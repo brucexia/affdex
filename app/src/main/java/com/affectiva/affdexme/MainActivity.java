@@ -55,6 +55,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /*
  * AffdexMe is an app that demonstrates the use of the Affectiva Android SDK.  It uses the
@@ -131,9 +133,15 @@ public class MainActivity extends AppCompatActivity
     private boolean isBackFacingCameraDetected = true;
     private boolean multiFaceModeEnabled = false;
 
+    TextView scoreView;
+    SharedPreferences sharedPreferences;
+    Timer scoringTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //To maximize UI space, we declare our app to be full-screen
         preproccessMetricImages();
         setContentView(R.layout.activity_main);
@@ -380,6 +388,8 @@ public class MainActivity extends AppCompatActivity
         metricDisplays[4] = (MetricDisplay) findViewById(R.id.metric_pct_4);
         metricDisplays[5] = (MetricDisplay) findViewById(R.id.metric_pct_5);
 
+        scoreView = (TextView) findViewById(R.id.scoreView);
+        scoreView.setText(String.valueOf(sharedPreferences.getInt("score", 0)));
         //Load Application Font and set UI Elements to use it
         Typeface face = Typeface.createFromAsset(getAssets(), "fonts/Square.ttf");
         for (TextView textView : metricNames) {
@@ -475,7 +485,6 @@ public class MainActivity extends AppCompatActivity
      * We use the Shared Preferences object to restore application settings.
      */
     public void restoreApplicationSettings() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //restore the camera type settings
         String cameraTypeName = sharedPreferences.getString("cameraType", CameraDetector.CameraType.CAMERA_FRONT.name());
@@ -668,6 +677,32 @@ public class MainActivity extends AppCompatActivity
         resetFPSCalculations(); //Since the FPS may be different whether a face is being tracked or not, reset variables.
     }
 
+    void updateScore(Face face) {
+        if (scoringTimer == null) {
+            scoringTimer = new Timer();
+            scoringTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    final int score = sharedPreferences.getInt("score", 0) + 1;
+                    sharedPreferences.edit().putInt("score", score).apply();
+                    scoreView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            scoreView.setText(String.valueOf(score));
+                        }
+                    });
+                }
+            }, new Date(System.currentTimeMillis()), 1000);
+        }
+    }
+
+    void stopTimer() {
+        if (scoringTimer != null) {
+            scoringTimer.cancel();
+        }
+        scoringTimer = null;
+    }
+
     /**
      * This event is received every time the SDK processes a frame.
      */
@@ -686,6 +721,7 @@ public class MainActivity extends AppCompatActivity
         //If faces.size() is 0, we received a frame in which no face was detected
         if (faces.size() <= 0) {
             drawingView.invalidatePoints();
+            stopTimer();
         } else if (faces.size() == 1) {
             metricViewLayout.setVisibility(View.VISIBLE);
 

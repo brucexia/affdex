@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -27,6 +28,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
+import com.affectiva.affdexme.utils.convexhull.FastConvexHull;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
 import java.io.FileNotFoundException;
@@ -35,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This class contains a SurfaceView and its own thread that draws to it.
@@ -314,6 +319,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         private DrawingViewConfig config;
         private DrawingThreadEventListener listener;
 
+
         public DrawingThread(SurfaceHolder surfaceHolder, DrawingViewConfig con, DrawingThreadEventListener listener) {
             mSurfaceHolder = surfaceHolder;
 
@@ -473,7 +479,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             //Coordinates around which to draw bounding box.
             //Default to an 'inverted' box, where the absolute max and min values of the surface view are inside-out
             Rect boundingRect = new Rect(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
-
+            List<PointF> transformedPoints = transformFacePoints(face.getFacePoints(), mirrorPoints);
             for (PointF point : face.getFacePoints()) {
                 //transform from the camera coordinates to our screen coordinates
                 //The camera preview is displayed as a mirror, so X pts have to be mirrored back.
@@ -517,6 +523,144 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             if (isMultiFaceMode) {
                 drawDominantEmotion(c, face, boundingRect);
             }
+            if (face.emotions.getJoy() > 30) {
+                switch (state) {
+                    case STATE_BIRD: {
+                        Bitmap bitmap = new FaceARFactory(getContext()).getARBitmap(face);
+                        if (bitmap != null) {
+                            // draw on tip of the nose
+                            PointF noseTip = transformedPoints.get(12);
+                            int left = Math.round(noseTip.x - bitmap.getWidth() / 2);
+                            int top = Math.round(noseTip.y - bitmap.getHeight() / 2);
+                            c.drawBitmap(bitmap, left, top, null);
+                        }
+                        if (timer == null) {
+                            timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    increaseState();
+                                    timer = null;
+                                }
+                            }, 5000);
+                        }
+                    }
+                    break;
+                    case STATE_FACE: {
+                        Paint paint1 = new Paint();
+                        paint1.setColor(Color.RED);
+                        paint1.setStyle(Paint.Style.STROKE);
+                        paint1.setStrokeWidth(10);
+                        paint1.setStrokeJoin(Paint.Join.ROUND);
+                        drawEye(getEdgePoints(transformedPoints), c, paint1);
+                        if (timer == null) {
+                            timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    timer = null;
+                                    increaseState();
+                                }
+                            }, 5000);
+                        }
+                    }
+                    break;
+                    case STATE_EYE: {
+                        FaceLandmarks faceLandmarks = new FaceLandmarks(transformedPoints);
+                        Paint paint1 = new Paint();
+                        paint1.setColor(Color.rgb(255, 165, 0));
+                        paint1.setStyle(Paint.Style.STROKE);
+                        paint1.setStrokeJoin(Paint.Join.ROUND);
+                        paint1.setStrokeWidth(10);
+                        drawEye(faceLandmarks.getLeftEyePoints(), c, paint1);
+                        drawEye(faceLandmarks.getRightEyePoints(), c, paint1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        Timer timer;
+        int state;
+        public static final int STATE_BIRD = 0;
+        public static final int STATE_FACE = 1;
+        public static final int STATE_EYE = 2;
+
+        void increaseState() {
+            if (state != STATE_EYE) {
+                state++;
+            }
+        }
+
+        void reset() {
+            if (timer != null) {
+                timer.cancel();//This may run into synchronization problem, enhance later.
+            }
+            state = 0;
+        }
+
+        List<PointF> getEdgePoints(List<PointF> points) {
+            FastConvexHull fastConvexHull = new FastConvexHull();
+            return fastConvexHull.execute((ArrayList<PointF>) points);
+        }
+
+        void drawPolygon(List<PointF> points, Canvas c, Paint paint) {
+            FastConvexHull fastConvexHull = new FastConvexHull();
+            ArrayList<PointF> convex = fastConvexHull.execute((ArrayList<PointF>) points);
+            Path path = new Path();
+            PointF p0 = convex.get(0);
+            path.moveTo(p0.x, p0.y);
+
+            for (int i = 1; i < convex.size(); i++) {
+                PointF pointF = convex.get(i);
+                path.lineTo(pointF.x, pointF.y);
+            }
+            if (!convex.get(convex.size() - 1).equals(p0)) {
+                path.lineTo(p0.x, p0.y);
+            }
+            path.close();
+
+            c.drawPath(path, paint);
+        }
+
+        void drawEye(List<PointF> points, Canvas canvas, Paint paint) {
+            Path path = new Path();
+            boolean first = true;
+            PointF firstPoint = points.get(0);
+            path.moveTo(firstPoint.x, firstPoint.y);
+            for (int i = 1; i < points.size(); i += 2) {
+                PointF point = points.get(i);
+                if (i < points.size() - 1) {
+                    PointF next = points.get(i + 1);
+                    path.quadTo(point.x, point.y, next.x, next.y);
+                } else {
+                    path.quadTo(point.x, point.y, firstPoint.x, firstPoint.y);
+                }
+            }
+            path.close();
+
+            canvas.drawPath(path, paint);
+
+        }
+
+        List<PointF> transformFacePoints(PointF points[], boolean mirrorPoints) {
+            List<PointF> result = new ArrayList<>();
+            for (PointF p : points) {
+                PointF q = getTransformedPointF(p, mirrorPoints);
+                result.add(q);
+            }
+            return result;
+        }
+
+        PointF getTransformedPointF(PointF point, boolean mirrorPoints) {
+            PointF result = new PointF();
+            if (mirrorPoints) {
+                result.x = (config.imageWidth - point.x) * config.screenToImageRatio;
+            } else {
+                result.x = (point.x) * config.screenToImageRatio;
+            }
+            result.y = (point.y) * config.screenToImageRatio;
+            return result;
         }
 
         private float findNecessaryHeightOffset(Rect boundingBox, Face face) {
@@ -782,5 +926,9 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
             drawThickness = t;
         }
+    }
+
+    public void reset() {
+        drawingThread.reset();
     }
 }
