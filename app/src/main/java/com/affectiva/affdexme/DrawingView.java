@@ -526,7 +526,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             if (face.emotions.getJoy() > 30) {
                 switch (state) {
                     case STATE_BIRD: {
-                        Bitmap bitmap = new FaceARFactory(getContext()).getARBitmap(face);
+                        Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(face);
                         if (bitmap != null) {
                             // draw on tip of the nose
                             PointF noseTip = transformedPoints.get(12);
@@ -552,7 +552,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                         paint1.setStyle(Paint.Style.STROKE);
                         paint1.setStrokeWidth(10);
                         paint1.setStrokeJoin(Paint.Join.ROUND);
-                        drawEye(getEdgePoints(transformedPoints), c, paint1);
+                        drawOutlineQuad(getEdgePoints(transformedPoints), c, paint1);
                         if (timer == null) {
                             timer = new Timer();
                             timer.schedule(new TimerTask() {
@@ -572,8 +572,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                         paint1.setStyle(Paint.Style.STROKE);
                         paint1.setStrokeJoin(Paint.Join.ROUND);
                         paint1.setStrokeWidth(10);
-                        drawEye(faceLandmarks.getLeftEyePoints(), c, paint1);
-                        drawEye(faceLandmarks.getRightEyePoints(), c, paint1);
+                        drawOutlineQuad(faceLandmarks.getLeftEyePoints(), c, paint1);
+                        drawOutlineQuad(faceLandmarks.getRightEyePoints(), c, paint1);
                     }
                     break;
                 }
@@ -604,26 +604,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             return fastConvexHull.execute((ArrayList<PointF>) points);
         }
 
-        void drawPolygon(List<PointF> points, Canvas c, Paint paint) {
-            FastConvexHull fastConvexHull = new FastConvexHull();
-            ArrayList<PointF> convex = fastConvexHull.execute((ArrayList<PointF>) points);
-            Path path = new Path();
-            PointF p0 = convex.get(0);
-            path.moveTo(p0.x, p0.y);
 
-            for (int i = 1; i < convex.size(); i++) {
-                PointF pointF = convex.get(i);
-                path.lineTo(pointF.x, pointF.y);
-            }
-            if (!convex.get(convex.size() - 1).equals(p0)) {
-                path.lineTo(p0.x, p0.y);
-            }
-            path.close();
-
-            c.drawPath(path, paint);
-        }
-
-        void drawEye(List<PointF> points, Canvas canvas, Paint paint) {
+        void drawOutlineQuad(List<PointF> points, Canvas canvas, Paint paint) {
             Path path = new Path();
             boolean first = true;
             PointF firstPoint = points.get(0);

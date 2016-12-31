@@ -10,10 +10,10 @@ import com.affectiva.android.affdex.sdk.detector.Face;
  * Created by brucexia on 2016-12-22.
  */
 
-public class FaceARFactory {
+public class FaceCoverImageFactory {
     Context mContext;
 
-    public FaceARFactory(Context context) {
+    public FaceCoverImageFactory(Context context) {
         mContext = context;
     }
 
