@@ -8,7 +8,6 @@ package com.affectiva.affdexme;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,23 +22,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.affectiva.affdexme.FaceInterface;
 import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
 import com.affectiva.affdexme.utils.convexhull.FastConvexHull;
-import com.affectiva.android.affdex.sdk.detector.Face;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+//import com.affectiva.android.affdex.sdk.detector.Face;
 
 /**
  * This class contains a SurfaceView and its own thread that draws to it.
@@ -253,7 +251,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         drawingViewConfig.isDrawEmojiMarkersEnabled = b;
     }
 
-    public void updatePoints(List<Face> faces, boolean isPointsMirrored) {
+    public void updatePoints(List<FaceInterface> faces, boolean isPointsMirrored) {
         drawingThread.updatePoints(faces, isPointsMirrored);
     }
 
@@ -299,7 +297,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
     class FacesSharer {
         boolean isPointsMirrored;
-        List<Face> facesToDraw;
+        List<FaceInterface> facesToDraw;
 
         public FacesSharer() {
             isPointsMirrored = false;
@@ -371,7 +369,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         //Updates thread with latest faces returned by the onImageResults() event.
-        public void updatePoints(List<Face> faces, boolean isPointsMirrored) {
+        public void updatePoints(List<FaceInterface> faces, boolean isPointsMirrored) {
             synchronized (sharer) {
                 sharer.facesToDraw.clear();
                 if (faces != null) {
@@ -437,7 +435,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         void draw(@NonNull Canvas c, @Nullable Canvas c2) {
-            Face nextFaceToDraw;
+            FaceInterface nextFaceToDraw;
             boolean mirrorPoints;
             boolean multiFaceMode;
             int index = 0;
@@ -475,7 +473,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
 
-        private void drawFaceAttributes(Canvas c, Face face, boolean mirrorPoints, boolean isMultiFaceMode) {
+        private void drawFaceAttributes(Canvas c, FaceInterface face, boolean mirrorPoints, boolean isMultiFaceMode) {
             //Coordinates around which to draw bounding box.
             //Default to an 'inverted' box, where the absolute max and min values of the surface view are inside-out
             Rect boundingRect = new Rect(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
@@ -504,26 +502,26 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
             //Draw the bounding box.
             if (config.isDrawPointsEnabled) {
-                drawBoundingBox(c, face, boundingRect);
+//                drawBoundingBox(c, facePoints, boundingRect);
             }
 
-            float heightOffset = findNecessaryHeightOffset(boundingRect, face);
+//            float heightOffset = findNecessaryHeightOffset(boundingRect, facePoints);
 
             //Draw the Appearance markers (gender / glasses)
             if (config.isDrawAppearanceMarkersEnabled) {
-                drawAppearanceMarkers(c, face, boundingRect, heightOffset);
+//                drawAppearanceMarkers(c, facePoints, boundingRect, heightOffset);
             }
 
             //Draw the Emoji markers
             if (config.isDrawEmojiMarkersEnabled) {
-                drawDominantEmoji(c, face, boundingRect, heightOffset);
+//                drawDominantEmoji(c, facePoints, boundingRect, heightOffset);
             }
 
             //Only draw the dominant emotion bar in multiface mode
             if (isMultiFaceMode) {
-                drawDominantEmotion(c, face, boundingRect);
+//                drawDominantEmotion(c, facePoints, boundingRect);
             }
-            if (face.emotions.getJoy() > 30) {
+            if (true) {
                 switch (state) {
                     case STATE_BIRD: {
                         Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(face);
@@ -566,7 +564,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                     }
                     break;
                     case STATE_EYE: {
-                        FaceLandmarks faceLandmarks = new FaceLandmarks(transformedPoints);
+                        FaceInterface faceLandmarks = new FaceLandmarks(transformedPoints);
                         Paint paint1 = new Paint();
                         paint1.setColor(Color.rgb(255, 165, 0));
                         paint1.setStyle(Paint.Style.STROKE);
@@ -625,7 +623,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         }
 
-        List<PointF> transformFacePoints(PointF points[], boolean mirrorPoints) {
+        List<PointF> transformFacePoints(List<PointF> points, boolean mirrorPoints) {
             List<PointF> result = new ArrayList<>();
             for (PointF p : points) {
                 PointF q = getTransformedPointF(p, mirrorPoints);
@@ -645,65 +643,65 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             return result;
         }
 
-        private float findNecessaryHeightOffset(Rect boundingBox, Face face) {
-            Bitmap appearanceBitmap = getAppearanceBitmapForFace(face);
-            Bitmap emojiBitmap = getDominantEmojiBitmapForFace(face);
+//        private float findNecessaryHeightOffset(Rect boundingBox, Face face) {
+//            Bitmap appearanceBitmap = getAppearanceBitmapForFace(face);
+//            Bitmap emojiBitmap = getDominantEmojiBitmapForFace(face);
+//
+//            float appearanceBitmapHeight = (appearanceBitmap != null) ? appearanceBitmap.getHeight() : 0;
+//            float emojiBitmapHeight = (emojiBitmap != null) ? emojiBitmap.getHeight() : 0;
+//            float spacingBetween = (appearanceBitmapHeight > 0 && emojiBitmapHeight > 0) ? MARGIN : 0;
+//            float totalHeightRequired = appearanceBitmapHeight + emojiBitmapHeight + spacingBetween;
+//
+//            float bitmapHeightOverflow = Math.max(totalHeightRequired - boundingBox.height(), 0);
+//
+//            return bitmapHeightOverflow / 2;  // distribute the overflow evenly on both sides of the bounding box
+//        }
 
-            float appearanceBitmapHeight = (appearanceBitmap != null) ? appearanceBitmap.getHeight() : 0;
-            float emojiBitmapHeight = (emojiBitmap != null) ? emojiBitmap.getHeight() : 0;
-            float spacingBetween = (appearanceBitmapHeight > 0 && emojiBitmapHeight > 0) ? MARGIN : 0;
-            float totalHeightRequired = appearanceBitmapHeight + emojiBitmapHeight + spacingBetween;
+//        private void drawBoundingBox(Canvas c, Face f, Rect boundingBox) {
+//            setValenceOfBoundingBox(f.emotions.getValence());
+//            c.drawRect(boundingBox.left,
+//                    boundingBox.top,
+//                    boundingBox.right,
+//                    boundingBox.bottom,
+//                    boundingBoxPaint);
+//        }
+//
+//        private void drawAppearanceMarkers(Canvas c, Face f, Rect boundingBox, float offset) {
+//            Bitmap bitmap = getAppearanceBitmapForFace(f);
+//            if (bitmap != null) {
+//                drawBitmapIfNotRecycled(c, bitmap, boundingBox.right + MARGIN, boundingBox.bottom - bitmap.getHeight() + offset);
+//            }
+//        }
 
-            float bitmapHeightOverflow = Math.max(totalHeightRequired - boundingBox.height(), 0);
-
-            return bitmapHeightOverflow / 2;  // distribute the overflow evenly on both sides of the bounding box
-        }
-
-        private void drawBoundingBox(Canvas c, Face f, Rect boundingBox) {
-            setValenceOfBoundingBox(f.emotions.getValence());
-            c.drawRect(boundingBox.left,
-                    boundingBox.top,
-                    boundingBox.right,
-                    boundingBox.bottom,
-                    boundingBoxPaint);
-        }
-
-        private void drawAppearanceMarkers(Canvas c, Face f, Rect boundingBox, float offset) {
-            Bitmap bitmap = getAppearanceBitmapForFace(f);
-            if (bitmap != null) {
-                drawBitmapIfNotRecycled(c, bitmap, boundingBox.right + MARGIN, boundingBox.bottom - bitmap.getHeight() + offset);
-            }
-        }
-
-        private Bitmap getAppearanceBitmapForFace(Face f) {
-            Bitmap bitmap = null;
-            switch (f.appearance.getGender()) {
-                case MALE:
-                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
-                        bitmap = appearanceMarkerBitmap_genderMale_glassesOn;
-                    } else {
-                        bitmap = appearanceMarkerBitmap_genderMale_glassesOff;
-                    }
-                    break;
-                case FEMALE:
-                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
-                        bitmap = appearanceMarkerBitmap_genderFemale_glassesOn;
-                    } else {
-                        bitmap = appearanceMarkerBitmap_genderFemale_glassesOff;
-                    }
-                    break;
-                case UNKNOWN:
-                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
-                        bitmap = appearanceMarkerBitmap_genderUnknown_glassesOn;
-                    } else {
-                        bitmap = appearanceMarkerBitmap_genderUnknown_glassesOff;
-                    }
-                    break;
-                default:
-                    Log.e(LOG_TAG, "Unknown gender: " + f.appearance.getGender());
-            }
-            return bitmap;
-        }
+//        private Bitmap getAppearanceBitmapForFace(Face f) {
+//            Bitmap bitmap = null;
+//            switch (f.appearance.getGender()) {
+//                case MALE:
+//                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
+//                        bitmap = appearanceMarkerBitmap_genderMale_glassesOn;
+//                    } else {
+//                        bitmap = appearanceMarkerBitmap_genderMale_glassesOff;
+//                    }
+//                    break;
+//                case FEMALE:
+//                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
+//                        bitmap = appearanceMarkerBitmap_genderFemale_glassesOn;
+//                    } else {
+//                        bitmap = appearanceMarkerBitmap_genderFemale_glassesOff;
+//                    }
+//                    break;
+//                case UNKNOWN:
+//                    if (Face.GLASSES.YES.equals(f.appearance.getGlasses())) {
+//                        bitmap = appearanceMarkerBitmap_genderUnknown_glassesOn;
+//                    } else {
+//                        bitmap = appearanceMarkerBitmap_genderUnknown_glassesOff;
+//                    }
+//                    break;
+//                default:
+//                    Log.e(LOG_TAG, "Unknown gender: " + f.appearance.getGender());
+//            }
+//            return bitmap;
+//        }
 
         private void drawBitmapIfNotRecycled(Canvas c, Bitmap b, float posX, float posY) {
             if (!b.isRecycled()) {
@@ -711,156 +709,156 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
 
-        private void drawDominantEmoji(Canvas c, Face f, Rect boundingBox, float offset) {
-            drawEmojiFromCache(c, f.emojis.getDominantEmoji().name(), boundingBox.right + MARGIN, boundingBox.top - offset);
-        }
+//        private void drawDominantEmoji(Canvas c, Face f, Rect boundingBox, float offset) {
+//            drawEmojiFromCache(c, f.emojis.getDominantEmoji().name(), boundingBox.right + MARGIN, boundingBox.top - offset);
+//        }
 
-        private void drawDominantEmotion(Canvas c, Face f, Rect boundingBox) {
-            Pair<String, Float> dominantMetric = findDominantEmotion(f);
+//        private void drawDominantEmotion(Canvas c, Face f, Rect boundingBox) {
+//            Pair<String, Float> dominantMetric = findDominantEmotion(f);
+//
+//            if (dominantMetric == null || dominantMetric.first.isEmpty()) {
+//                return;
+//            }
+//
+//            String emotionText = dominantMetric.first;
+//            String emotionValue = Math.round(dominantMetric.second) + "%";
+//
+//            Rect emotionTextBounds = new Rect();
+//            config.dominantEmotionLabelPaint.getTextBounds(emotionText, 0, emotionText.length(), emotionTextBounds);
+//
+//            Rect emotionValueBounds = new Rect();
+//            config.dominantEmotionValuePaint.getTextBounds(emotionValue, 0, emotionValue.length(), emotionValueBounds);
+//
+//            float drawAtX = boundingBox.exactCenterX();
+//            float drawAtY = boundingBox.bottom + MARGIN + emotionTextBounds.height();
+//            c.drawText(emotionText, drawAtX, drawAtY, config.dominantEmotionLabelPaint);
+//
+//            //draws the colored bar that appears behind our score
+//            drawAtY += MARGIN + emotionValueBounds.height();
+//            int halfWidth = Math.round(config.metricBarWidth / 200.0f * dominantMetric.second);
+//            c.drawRect(drawAtX - halfWidth, drawAtY - emotionValueBounds.height(), drawAtX + halfWidth, drawAtY, config.dominantEmotionMetricBarPaint);
+//
+//            //draws the score
+//            c.drawText(emotionValue, drawAtX, drawAtY, config.dominantEmotionValuePaint);
+//        }
 
-            if (dominantMetric == null || dominantMetric.first.isEmpty()) {
-                return;
-            }
-
-            String emotionText = dominantMetric.first;
-            String emotionValue = Math.round(dominantMetric.second) + "%";
-
-            Rect emotionTextBounds = new Rect();
-            config.dominantEmotionLabelPaint.getTextBounds(emotionText, 0, emotionText.length(), emotionTextBounds);
-
-            Rect emotionValueBounds = new Rect();
-            config.dominantEmotionValuePaint.getTextBounds(emotionValue, 0, emotionValue.length(), emotionValueBounds);
-
-            float drawAtX = boundingBox.exactCenterX();
-            float drawAtY = boundingBox.bottom + MARGIN + emotionTextBounds.height();
-            c.drawText(emotionText, drawAtX, drawAtY, config.dominantEmotionLabelPaint);
-
-            //draws the colored bar that appears behind our score
-            drawAtY += MARGIN + emotionValueBounds.height();
-            int halfWidth = Math.round(config.metricBarWidth / 200.0f * dominantMetric.second);
-            c.drawRect(drawAtX - halfWidth, drawAtY - emotionValueBounds.height(), drawAtX + halfWidth, drawAtY, config.dominantEmotionMetricBarPaint);
-
-            //draws the score
-            c.drawText(emotionValue, drawAtX, drawAtY, config.dominantEmotionValuePaint);
-        }
-
-        private Pair<String, Float> findDominantEmotion(Face f) {
-            String dominantMetricName = "";
-            Float dominantMetricValue = 50.0f; // no emotion is dominant unless at least greater than this value
-
-            if (f.emotions.getAnger() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.ANGER);
-                dominantMetricValue = f.emotions.getAnger();
-            }
-            if (f.emotions.getContempt() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.CONTEMPT);
-                dominantMetricValue = f.emotions.getContempt();
-            }
-            if (f.emotions.getDisgust() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.DISGUST);
-                dominantMetricValue = f.emotions.getDisgust();
-            }
-            if (f.emotions.getFear() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.FEAR);
-                dominantMetricValue = f.emotions.getFear();
-            }
-            if (f.emotions.getJoy() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.JOY);
-                dominantMetricValue = f.emotions.getJoy();
-            }
-            if (f.emotions.getSadness() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.SADNESS);
-                dominantMetricValue = f.emotions.getSadness();
-            }
-            if (f.emotions.getSurprise() > dominantMetricValue) {
-                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.SURPRISE);
-                dominantMetricValue = f.emotions.getSurprise();
-            }
-            // Ignore VALENCE and ENGAGEMENT
-
-            if (dominantMetricName.isEmpty()) {
-                return null;
-            } else {
-                return new Pair<>(dominantMetricName, dominantMetricValue);
-            }
-        }
+//        private Pair<String, Float> findDominantEmotion(Face f) {
+//            String dominantMetricName = "";
+//            Float dominantMetricValue = 50.0f; // no emotion is dominant unless at least greater than this value
+//
+//            if (f.emotions.getAnger() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.ANGER);
+//                dominantMetricValue = f.emotions.getAnger();
+//            }
+//            if (f.emotions.getContempt() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.CONTEMPT);
+//                dominantMetricValue = f.emotions.getContempt();
+//            }
+//            if (f.emotions.getDisgust() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.DISGUST);
+//                dominantMetricValue = f.emotions.getDisgust();
+//            }
+//            if (f.emotions.getFear() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.FEAR);
+//                dominantMetricValue = f.emotions.getFear();
+//            }
+//            if (f.emotions.getJoy() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.JOY);
+//                dominantMetricValue = f.emotions.getJoy();
+//            }
+//            if (f.emotions.getSadness() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.SADNESS);
+//                dominantMetricValue = f.emotions.getSadness();
+//            }
+//            if (f.emotions.getSurprise() > dominantMetricValue) {
+//                dominantMetricName = MetricsManager.getCapitalizedName(MetricsManager.Emotions.SURPRISE);
+//                dominantMetricValue = f.emotions.getSurprise();
+//            }
+//            // Ignore VALENCE and ENGAGEMENT
+//
+//            if (dominantMetricName.isEmpty()) {
+//                return null;
+//            } else {
+//                return new Pair<>(dominantMetricName, dominantMetricValue);
+//            }
+//        }
 
         void drawEmojiFromCache(Canvas c, String emojiName, float markerPosX, float markerPosY) {
             Bitmap emojiBitmap;
 
-            try {
-                emojiBitmap = getEmojiBitmapByName(emojiName);
-            } catch (FileNotFoundException e) {
-                Log.e(LOG_TAG, "Error, file not found!", e);
-                return;
-            }
+//            try {
+//                emojiBitmap = getEmojiBitmapByName(emojiName);
+//            } catch (FileNotFoundException e) {
+//                Log.e(LOG_TAG, "Error, file not found!", e);
+//                return;
+//            }
 
-            if (emojiBitmap != null) {
-                c.drawBitmap(emojiBitmap, markerPosX, markerPosY, null);
-            }
+//            if (emojiBitmap != null) {
+//                c.drawBitmap(emojiBitmap, markerPosX, markerPosY, null);
+//            }
         }
 
-        private Bitmap getDominantEmojiBitmapForFace(Face f) {
-            try {
-                return getEmojiBitmapByName(f.emojis.getDominantEmoji().name());
-            } catch (FileNotFoundException e) {
-                Log.e(LOG_TAG, "Dominant emoji bitmap not available", e);
-                return null;
-            }
-        }
-
-        Bitmap getEmojiBitmapByName(String emojiName) throws FileNotFoundException {
-            // No bitmap necessary if emoji is unknown
-            if (emojiName.equals(Face.EMOJI.UNKNOWN.name())) {
-                return null;
-            }
-
-            String emojiResourceName = emojiName.trim().replace(' ', '_').toLowerCase(Locale.US).concat("_emoji");
-            String emojiFileName = emojiResourceName + ".png";
-
-            //Try to get the emoji from the cache
-            Bitmap desiredEmojiBitmap = emojiMarkerBitmapToEmojiTypeMap.get(emojiFileName);
-
-            if (desiredEmojiBitmap != null) {
-                //emoji bitmap found in the cache
-                return desiredEmojiBitmap;
-            }
-
-            //Cache miss, try and load the bitmap from disk
-            desiredEmojiBitmap = ImageHelper.loadBitmapFromInternalStorage(getContext(), emojiFileName);
-
-            if (desiredEmojiBitmap != null) {
-                //emoji bitmap found in the app storage
-
-
-                //Bitmap loaded, add to cache for subsequent use.
-                emojiMarkerBitmapToEmojiTypeMap.put(emojiFileName, desiredEmojiBitmap);
-
-                return desiredEmojiBitmap;
-            }
-
-            Log.d(LOG_TAG, "Emoji not found on disk: " + emojiFileName);
-
-            //Still unable to find the file, try to locate the emoji resource
-            final int resourceId = getDrawable(getContext(), emojiFileName);
-
-            if (resourceId == 0) {
-                //unrecognised emoji file name
-                throw new FileNotFoundException("Resource not found for file named: " + emojiFileName);
-            }
-
-            desiredEmojiBitmap = BitmapFactory.decodeResource(getResources(), resourceId);
-
-            if (desiredEmojiBitmap == null) {
-                //still unable to load the resource from the file
-                throw new FileNotFoundException("Resource id [" + resourceId + "] but could not load bitmap: " + emojiFileName);
-            }
-
-            //Bitmap loaded, add to cache for subsequent use.
-            emojiMarkerBitmapToEmojiTypeMap.put(emojiFileName, desiredEmojiBitmap);
-
-            return desiredEmojiBitmap;
-        }
+//        private Bitmap getDominantEmojiBitmapForFace(Face f) {
+//            try {
+//                return getEmojiBitmapByName(f.emojis.getDominantEmoji().name());
+//            } catch (FileNotFoundException e) {
+//                Log.e(LOG_TAG, "Dominant emoji bitmap not available", e);
+//                return null;
+//            }
+//        }
+//
+//        Bitmap getEmojiBitmapByName(String emojiName) throws FileNotFoundException {
+//            // No bitmap necessary if emoji is unknown
+//            if (emojiName.equals(Face.EMOJI.UNKNOWN.name())) {
+//                return null;
+//            }
+//
+//            String emojiResourceName = emojiName.trim().replace(' ', '_').toLowerCase(Locale.US).concat("_emoji");
+//            String emojiFileName = emojiResourceName + ".png";
+//
+//            //Try to get the emoji from the cache
+//            Bitmap desiredEmojiBitmap = emojiMarkerBitmapToEmojiTypeMap.get(emojiFileName);
+//
+//            if (desiredEmojiBitmap != null) {
+//                //emoji bitmap found in the cache
+//                return desiredEmojiBitmap;
+//            }
+//
+//            //Cache miss, try and load the bitmap from disk
+//            desiredEmojiBitmap = ImageHelper.loadBitmapFromInternalStorage(getContext(), emojiFileName);
+//
+//            if (desiredEmojiBitmap != null) {
+//                //emoji bitmap found in the app storage
+//
+//
+//                //Bitmap loaded, add to cache for subsequent use.
+//                emojiMarkerBitmapToEmojiTypeMap.put(emojiFileName, desiredEmojiBitmap);
+//
+//                return desiredEmojiBitmap;
+//            }
+//
+//            Log.d(LOG_TAG, "Emoji not found on disk: " + emojiFileName);
+//
+//            //Still unable to find the file, try to locate the emoji resource
+//            final int resourceId = getDrawable(getContext(), emojiFileName);
+//
+//            if (resourceId == 0) {
+//                //unrecognised emoji file name
+//                throw new FileNotFoundException("Resource not found for file named: " + emojiFileName);
+//            }
+//
+//            desiredEmojiBitmap = BitmapFactory.decodeResource(getResources(), resourceId);
+//
+//            if (desiredEmojiBitmap == null) {
+//                //still unable to load the resource from the file
+//                throw new FileNotFoundException("Resource id [" + resourceId + "] but could not load bitmap: " + emojiFileName);
+//            }
+//
+//            //Bitmap loaded, add to cache for subsequent use.
+//            emojiMarkerBitmapToEmojiTypeMap.put(emojiFileName, desiredEmojiBitmap);
+//
+//            return desiredEmojiBitmap;
+//        }
     }
 
     class DrawingViewConfig {

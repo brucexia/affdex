@@ -42,6 +42,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
 import com.affectiva.android.affdex.sdk.Frame;
 import com.affectiva.android.affdex.sdk.Frame.ROTATE;
 import com.affectiva.android.affdex.sdk.detector.CameraDetector;
@@ -52,6 +53,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -731,12 +734,13 @@ public class MainActivity extends AppCompatActivity
             }
 
             /**
-             * If the user has selected to have any facial attributes drawn, we use face.getFacePoints() to send those points
+             * If the user has selected to have any facial attributes drawn, we use face.getFaces() to send those points
              * to our drawing thread and also inform the thread what the valence score was, as that will determine the color
              * of the bounding box.
              */
             if (drawingView.getDrawPointsEnabled() || drawingView.getDrawAppearanceMarkersEnabled() || drawingView.getDrawEmojiMarkersEnabled()) {
-                drawingView.updatePoints(faces, mirrorPoints);
+
+                drawingView.updatePoints(getFaces(faces), mirrorPoints);
             }
 
         } else {
@@ -744,8 +748,16 @@ public class MainActivity extends AppCompatActivity
             metricViewLayout.setVisibility(View.GONE);
 
             // always update points in multi face mode
-            drawingView.updatePoints(faces, mirrorPoints);
+            drawingView.updatePoints(getFaces(faces), mirrorPoints);
         }
+    }
+
+    List<FaceInterface> getFaces(List<Face> faces) {
+        List<FaceInterface> facePoints = new ArrayList<>();
+        for (Face face : faces) {
+            facePoints.add(new FaceLandmarks(Arrays.asList(face.getFacePoints())));
+        }
+        return facePoints;
     }
 
     public void takeScreenshot(View view) {
