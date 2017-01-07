@@ -60,6 +60,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawingThread drawingThread; //DrawingThread object
     private DrawingViewConfig drawingViewConfig;
     private DrawingThreadEventListener listener;
+    FaceAnimationV1 faceAnimation;
 
     //three constructors required of any custom view
     public DrawingView(Context context) {
@@ -75,6 +76,10 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
     public DrawingView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initView();
+    }
+
+    public void setFaceAnimation(FaceAnimationV1 faceAnimation) {
+        this.faceAnimation = faceAnimation;
     }
 
     private static int getDrawable(@NonNull Context context, @NonNull String name) {
@@ -523,13 +528,14 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             if (isMultiFaceMode) {
                 drawDominantEmotion(c, face, boundingRect);
             }
-            if (face.emotions.getJoy() > 30) {
+            if (true) {
+//            if (face.emotions.getJoy() > 30) {
+                            PointF noseTip = transformedPoints.get(12);
                 switch (state) {
                     case STATE_BIRD: {
                         Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(face);
                         if (bitmap != null) {
                             // draw on tip of the nose
-                            PointF noseTip = transformedPoints.get(12);
                             int left = Math.round(noseTip.x - bitmap.getWidth() / 2);
                             int top = Math.round(noseTip.y - bitmap.getHeight() / 2);
                             c.drawBitmap(bitmap, left, top, null);
@@ -545,6 +551,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                             }, 5000);
                         }
                     }
+                    drawFaceAnimation(c, noseTip);
                     break;
                     case STATE_FACE: {
                         Paint paint1 = new Paint();
@@ -563,6 +570,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                                 }
                             }, 5000);
                         }
+                        drawFaceAnimation(c, noseTip);
                     }
                     break;
                     case STATE_EYE: {
@@ -574,6 +582,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                         paint1.setStrokeWidth(10);
                         drawOutlineQuad(faceLandmarks.getLeftEyePoints(), c, paint1);
                         drawOutlineQuad(faceLandmarks.getRightEyePoints(), c, paint1);
+                        drawEyeAnimation(c, faceLandmarks);
                     }
                     break;
                 }
@@ -604,6 +613,15 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             return fastConvexHull.execute((ArrayList<PointF>) points);
         }
 
+        void drawFaceAnimation(Canvas c, PointF noseTip) {
+            int index = faceAnimation.getCurrentFrameIndex();
+            c.drawCircle(noseTip.x, noseTip.y, 300 + index * 10, faceAnimation.getCurrentStrokePaint(index));
+        }
+
+        void drawEyeAnimation(Canvas c, FaceLandmarks face) {
+            int index = faceAnimation.getCurrentFrameIndex();
+            c.drawOval(face.getEyesRect(), faceAnimation.getCurrentStrokePaint(faceAnimation.getCurrentFrameIndex()));
+        }
 
         void drawOutlineQuad(List<PointF> points, Canvas canvas, Paint paint) {
             Path path = new Path();
@@ -863,11 +881,11 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    class DrawingViewConfig {
-        private int imageWidth = 1;
-        private int surfaceViewWidth = 0;
-        private int surfaceViewHeight = 0;
-        private float screenToImageRatio = 0;
+    public static class DrawingViewConfig {
+        public int imageWidth = 1;
+        public int surfaceViewWidth = 0;
+        public int surfaceViewHeight = 0;
+        public float screenToImageRatio = 0;
         private int drawThickness = 0;
         private boolean isDrawPointsEnabled = true; //by default, have the drawing thread draw tracking dots
         private boolean isDimensionsNeeded = true;

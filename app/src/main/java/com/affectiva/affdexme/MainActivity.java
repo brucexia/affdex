@@ -422,6 +422,13 @@ public class MainActivity extends AppCompatActivity
         //Attach event listerner to drawing view
         drawingView.setEventListener(this);
 
+        drawingView.setFaceAnimation(new FaceAnimationV1(this));
+        drawingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawingView.reset();
+            }
+        });
         /*
          * This app sets the View.SYSTEM_UI_FLAG_HIDE_NAVIGATION flag. Unfortunately, this flag causes
          * Android to steal the first touch event after the navigation bar has been hidden, a touch event
