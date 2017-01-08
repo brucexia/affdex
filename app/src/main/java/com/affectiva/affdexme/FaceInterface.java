@@ -3,6 +3,7 @@ package com.affectiva.affdexme;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import com.affectiva.affdexme.facesdk.Emojis;
 import com.affectiva.affdexme.facesdk.Emotions;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
@@ -23,4 +24,5 @@ public interface FaceInterface {
 
     public RectF getEyesRect();
     public Emotions getEmotions();
+    Emojis getEmojis();
 }

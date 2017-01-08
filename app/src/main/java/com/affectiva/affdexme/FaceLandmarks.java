@@ -3,6 +3,9 @@ package com.affectiva.affdexme;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import com.affectiva.affdexme.facesdk.AffdexEmojis;
+import com.affectiva.affdexme.facesdk.AffdexEmotions;
+import com.affectiva.affdexme.facesdk.Emojis;
 import com.affectiva.affdexme.facesdk.Emotions;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
@@ -77,7 +80,12 @@ public class FaceLandmarks implements FaceInterface {
 
     @Override
     public Emotions getEmotions() {
-        return null;
+        return new AffdexEmotions(sdkFace.emotions);
+    }
+
+    @Override
+    public Emojis getEmojis() {
+        return new AffdexEmojis(sdkFace.emojis);
     }
 
     public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints) {

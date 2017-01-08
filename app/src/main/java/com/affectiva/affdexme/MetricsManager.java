@@ -46,7 +46,7 @@ public class MetricsManager {
 
     //Used for MetricSelectionFragment
     //This method is optimized for strings of the form SOME_METRIC_NAME, which all metric names currently are
-    static String getCapitalizedName(Metrics metric) {
+    public static String getCapitalizedName(Metrics metric) {
         if (metric.getType().equals(MetricType.Emoji)) {
             return ((Emojis) metric).getDisplayName();
         }
