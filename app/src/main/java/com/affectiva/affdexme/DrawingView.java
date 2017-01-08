@@ -485,16 +485,10 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             //Default to an 'inverted' box, where the absolute max and min values of the surface view are inside-out
             Rect boundingRect = new Rect(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
             List<PointF> transformedPoints = transformFacePoints(face.getFacePoints(), mirrorPoints);
-            for (PointF point : face.getFacePoints()) {
+            for (PointF point : transformedPoints) {
                 //transform from the camera coordinates to our screen coordinates
                 //The camera preview is displayed as a mirror, so X pts have to be mirrored back.
-                float x;
-                if (mirrorPoints) {
-                    x = (config.imageWidth - point.x) * config.screenToImageRatio;
-                } else {
-                    x = (point.x) * config.screenToImageRatio;
-                }
-                float y = (point.y) * config.screenToImageRatio;
+                float x = point.x, y = point.y;
 
                 //For some reason I needed to add each point twice to make sure that all the
                 //points get properly registered in the bounding box.
@@ -550,8 +544,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                                 }
                             }, 5000);
                         }
+                        drawFaceAnimation(c, noseTip);
                     }
-                    drawFaceAnimation(c, noseTip);
                     break;
                     case STATE_FACE: {
                         Paint paint1 = new Paint();
@@ -575,13 +569,13 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                     break;
                     case STATE_EYE: {
                         FaceLandmarks faceLandmarks = new FaceLandmarks(transformedPoints);
-                        Paint paint1 = new Paint();
-                        paint1.setColor(Color.rgb(255, 165, 0));
-                        paint1.setStyle(Paint.Style.STROKE);
-                        paint1.setStrokeJoin(Paint.Join.ROUND);
-                        paint1.setStrokeWidth(10);
-                        drawOutlineQuad(faceLandmarks.getLeftEyePoints(), c, paint1);
-                        drawOutlineQuad(faceLandmarks.getRightEyePoints(), c, paint1);
+//                        Paint paint1 = new Paint();
+//                        paint1.setColor(Color.rgb(255, 165, 0));
+//                        paint1.setStyle(Paint.Style.STROKE);
+//                        paint1.setStrokeJoin(Paint.Join.ROUND);
+//                        paint1.setStrokeWidth(10);
+//                        drawOutlineQuad(faceLandmarks.getLeftEyePoints(), c, paint1);
+//                        drawOutlineQuad(faceLandmarks.getRightEyePoints(), c, paint1);
                         drawEyeAnimation(c, faceLandmarks);
                     }
                     break;
@@ -596,7 +590,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int STATE_EYE = 2;
 
         void increaseState() {
-            if (state != STATE_EYE) {
+            if (state < STATE_EYE) {
                 state++;
             }
         }
@@ -604,6 +598,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         void reset() {
             if (timer != null) {
                 timer.cancel();//This may run into synchronization problem, enhance later.
+                timer = null;
             }
             state = 0;
         }
