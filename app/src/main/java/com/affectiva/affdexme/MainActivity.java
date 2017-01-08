@@ -747,7 +747,7 @@ public class MainActivity extends AppCompatActivity
              */
             if (drawingView.getDrawPointsEnabled() || drawingView.getDrawAppearanceMarkersEnabled() || drawingView.getDrawEmojiMarkersEnabled()) {
 
-                drawingView.updatePoints(getFaces(faces), mirrorPoints);
+                drawingView.updatePoints(faces, mirrorPoints);
             }
 
         } else {
@@ -755,7 +755,7 @@ public class MainActivity extends AppCompatActivity
             metricViewLayout.setVisibility(View.GONE);
 
             // always update points in multi face mode
-            drawingView.updatePoints(getFaces(faces), mirrorPoints);
+            drawingView.updatePoints(faces, mirrorPoints);
         }
     }
 

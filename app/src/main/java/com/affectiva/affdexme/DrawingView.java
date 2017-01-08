@@ -527,7 +527,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                             PointF noseTip = transformedPoints.get(12);
                 switch (state) {
                     case STATE_BIRD: {
-                        Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(face);
+                        Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(null);
                         if (bitmap != null) {
                             // draw on tip of the nose
                             int left = Math.round(noseTip.x - bitmap.getWidth() / 2);
