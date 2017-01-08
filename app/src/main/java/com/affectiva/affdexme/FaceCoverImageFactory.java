@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
 /**
@@ -17,11 +18,11 @@ public class FaceCoverImageFactory {
         mContext = context;
     }
 
-    public Bitmap getARBitmap(Face face) {
-        Face.Emotions emotions = face.emotions;
-        if (emotions.getJoy() > 30) {
+    public Bitmap getARBitmap(FaceInterface face) {
+//        Face.Emotions emotions = face.emotions;
+//        if (emotions.getJoy() > 30) {
             return BitmapFactory.decodeResource(mContext.getResources(), R.drawable.angrybird_head);
-        }
-        return null;
+//        }
+//        return null;
     }
 }

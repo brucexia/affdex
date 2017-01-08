@@ -6,6 +6,8 @@ import android.graphics.RectF;
 
 import com.affectiva.affdexme.DrawingView;
 
+import com.affectiva.affdexme.FaceInterface;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
  * Created by brucexia on 2016-12-22.
  */
 
-public class FaceLandmarks {
+public class FaceLandmarks implements FaceInterface {
     public static final int OuterRightEye = 16;
     public static final int InnerRightEye = 17;
     public static final int UpperCornerRightEye = 30;
@@ -30,6 +32,8 @@ public class FaceLandmarks {
         mFacePoints = new ArrayList<>(facePoints);
     }
 
+
+    @Override
     public List<PointF> getFacePoints() {
         return mFacePoints;
     }
