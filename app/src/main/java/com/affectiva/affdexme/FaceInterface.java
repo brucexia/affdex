@@ -3,6 +3,9 @@ package com.affectiva.affdexme;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import com.affectiva.affdexme.facesdk.Emotions;
+import com.affectiva.android.affdex.sdk.detector.Face;
+
 import java.util.List;
 
 /**
@@ -19,4 +22,5 @@ public interface FaceInterface {
     public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints);
 
     public RectF getEyesRect();
+    public Emotions getEmotions();
 }

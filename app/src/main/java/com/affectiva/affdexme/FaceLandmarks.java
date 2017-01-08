@@ -3,7 +3,11 @@ package com.affectiva.affdexme;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import com.affectiva.affdexme.facesdk.Emotions;
+import com.affectiva.android.affdex.sdk.detector.Face;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,10 +25,12 @@ public class FaceLandmarks implements FaceInterface {
     public static final int UpperCornerLeftEye = 32;
     public static final int LowerCornerLeftEye = 33;
 
+    Face sdkFace;
     List<PointF> mFacePoints;
 
-    public FaceLandmarks(List<PointF> facePoints) {
-        mFacePoints = new ArrayList<>(facePoints);
+    public FaceLandmarks(Face face) {
+        sdkFace = face;
+        mFacePoints = new ArrayList(Arrays.asList(face.getFacePoints()));
     }
 
 
@@ -67,6 +73,12 @@ public class FaceLandmarks implements FaceInterface {
         return rect;
     }
     //toDO: add emotions
+
+
+    @Override
+    public Emotions getEmotions() {
+        return null;
+    }
 
     public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints) {
         return transformFacePoints(mFacePoints, mirrorPoints, config);
