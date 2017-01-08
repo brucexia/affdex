@@ -1,6 +1,7 @@
 package com.affectiva.affdexme;
 
 import android.graphics.PointF;
+import android.graphics.RectF;
 
 import java.util.List;
 
@@ -14,4 +15,8 @@ public interface FaceInterface {
     List<PointF> getLeftEyePoints();
 
     List<PointF> getRightEyePoints();
+
+    public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints);
+
+    public RectF getEyesRect();
 }

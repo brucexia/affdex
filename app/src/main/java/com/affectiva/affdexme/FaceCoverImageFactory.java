@@ -4,9 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
-import com.affectiva.android.affdex.sdk.detector.Face;
-
 /**
  * Created by brucexia on 2016-12-22.
  */

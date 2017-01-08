@@ -28,7 +28,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.affectiva.affdexme.utils.convexhull.FaceLandmarks;
 import com.affectiva.affdexme.utils.convexhull.FastConvexHull;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
@@ -873,53 +872,6 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             emojiMarkerBitmapToEmojiTypeMap.put(emojiFileName, desiredEmojiBitmap);
 
             return desiredEmojiBitmap;
-        }
-    }
-
-    public static class DrawingViewConfig {
-        public int imageWidth = 1;
-        public int surfaceViewWidth = 0;
-        public int surfaceViewHeight = 0;
-        public float screenToImageRatio = 0;
-        private int drawThickness = 0;
-        private boolean isDrawPointsEnabled = true; //by default, have the drawing thread draw tracking dots
-        private boolean isDimensionsNeeded = true;
-        private boolean isDrawAppearanceMarkersEnabled = true; //by default, draw the appearance markers
-        private boolean isDrawEmojiMarkersEnabled = true; //by default, draw the dominant emoji markers
-
-        private Paint dominantEmotionLabelPaint;
-        private Paint dominantEmotionMetricBarPaint;
-        private Paint dominantEmotionValuePaint;
-        private int metricBarWidth;
-
-        public void setDominantEmotionLabelPaints(Paint labelPaint, Paint valuePaint) {
-            dominantEmotionLabelPaint = labelPaint;
-            dominantEmotionValuePaint = valuePaint;
-        }
-
-        public void setDominantEmotionMetricBarConfig(Paint metricBarPaint, int metricBarWidth) {
-            dominantEmotionMetricBarPaint = metricBarPaint;
-            this.metricBarWidth = metricBarWidth;
-        }
-
-        public void updateViewDimensions(int surfaceViewWidth, int surfaceViewHeight, int imageWidth, int imageHeight) {
-            if (surfaceViewWidth <= 0 || surfaceViewHeight <= 0 || imageWidth <= 0 || imageHeight <= 0) {
-                throw new IllegalArgumentException("All dimensions submitted to updateViewDimensions() must be positive");
-            }
-            this.imageWidth = imageWidth;
-            this.surfaceViewWidth = surfaceViewWidth;
-            this.surfaceViewHeight = surfaceViewHeight;
-            screenToImageRatio = (float) surfaceViewWidth / imageWidth;
-            isDimensionsNeeded = false;
-        }
-
-        public void setDrawThickness(int t) {
-
-            if (t <= 0) {
-                throw new IllegalArgumentException("Thickness must be positive.");
-            }
-
-            drawThickness = t;
         }
     }
 

@@ -1,12 +1,7 @@
-package com.affectiva.affdexme.utils.convexhull;
+package com.affectiva.affdexme;
 
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
-
-import com.affectiva.affdexme.DrawingView;
-
-import com.affectiva.affdexme.FaceInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,18 +68,18 @@ public class FaceLandmarks implements FaceInterface {
     }
     //toDO: add emotions
 
-    public List<PointF> transformPoints(DrawingView.DrawingViewConfig config, boolean mirrorPoints) {
+    public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints) {
         return transformFacePoints(mFacePoints, mirrorPoints, config);
     }
 
-    List<PointF> transformFacePoints(List<PointF> points, boolean mirrorPoints, DrawingView.DrawingViewConfig config) {
+    List<PointF> transformFacePoints(List<PointF> points, boolean mirrorPoints, DrawingViewConfig config) {
         for (PointF p : points) {
             PointF q = getTransformedPointF(p, mirrorPoints, config);
         }
         return mFacePoints;
     }
 
-    PointF getTransformedPointF(PointF result, boolean mirrorPoints, DrawingView.DrawingViewConfig config) {
+    PointF getTransformedPointF(PointF result, boolean mirrorPoints, DrawingViewConfig config) {
         if (mirrorPoints) {
             result.x = (config.imageWidth - result.x) * config.screenToImageRatio;
         } else {
