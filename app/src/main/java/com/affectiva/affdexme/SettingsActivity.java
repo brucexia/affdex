@@ -45,7 +45,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     //Boilerplate method, required by Android API
-    @Override
+//    @Override
     protected boolean isValidFragment(String fragmentName) {
         return SettingsFragment.class.getName().equals(fragmentName) || MetricSelectionFragment.class.getName().equals(fragmentName);
     }

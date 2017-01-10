@@ -6,6 +6,7 @@
 package com.affectiva.affdexme;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,7 +25,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -90,7 +90,7 @@ import java.util.TimerTask;
  * - Run the app on an Android device with a front-facing camera
  */
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends Activity
         implements Detector.FaceListener, Detector.ImageListener, CameraDetector.CameraEventListener,
         View.OnTouchListener, ActivityCompat.OnRequestPermissionsResultCallback, DrawingView.DrawingThreadEventListener {
 
@@ -246,9 +246,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == CAMERA_PERMISSIONS_REQUEST) {
             for (int i = 0; i < permissions.length; i++) {

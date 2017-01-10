@@ -397,9 +397,9 @@ public class MetricSelectionFragment extends Fragment implements View.OnClickLis
                 safePlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
                     @Override
                     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                            videoPlayingSelector.removeCover();
-                        }
+//                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+//                            videoPlayingSelector.removeCover();
+//                        }
                         return false;
                     }
                 });
