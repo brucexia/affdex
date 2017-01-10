@@ -567,7 +567,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                     }
                     break;
                     case STATE_EYE: {
-                        FaceLandmarks faceLandmarks = new FaceLandmarks(transformedPoints);
+                        FaceLandmarks faceLandmarks = new FaceLandmarks(face);
+                        faceLandmarks.mFacePoints = transformedPoints;
 //                        Paint paint1 = new Paint();
 //                        paint1.setColor(Color.rgb(255, 165, 0));
 //                        paint1.setStyle(Paint.Style.STROKE);

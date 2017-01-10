@@ -760,7 +760,7 @@ public class MainActivity extends Activity
     List<FaceInterface> getFaces(List<Face> faces) {
         List<FaceInterface> facePoints = new ArrayList<>();
         for (Face face : faces) {
-            facePoints.add(new FaceLandmarks(Arrays.asList(face.getFacePoints())));
+            facePoints.add(new FaceLandmarks(face));
         }
         return facePoints;
     }
