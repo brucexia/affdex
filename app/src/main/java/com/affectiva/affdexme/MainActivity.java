@@ -7,26 +7,20 @@ package com.affectiva.affdexme;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.app.AlertDialog;
-import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,15 +43,9 @@ import com.affectiva.android.affdex.sdk.detector.CameraDetector;
 import com.affectiva.android.affdex.sdk.detector.Detector;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -146,8 +134,8 @@ public class MainActivity extends Activity
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //To maximize UI space, we declare our app to be full-screen
-        preproccessMetricImages();
-        setContentView(R.layout.activity_main);
+//        preproccessMetricImages();
+        setContentView(R.layout.activity_main1);
         initializeUI();
         checkForCameraPermissions();
         determineCameraAvailability();
@@ -157,26 +145,6 @@ public class MainActivity extends Activity
     /**
      * Only load the files onto disk the first time the app opens
      */
-    private void preproccessMetricImages() {
-        Context context = getBaseContext();
-
-        for (Face.EMOJI emoji : Face.EMOJI.values()) {
-            if (emoji.equals(Face.EMOJI.UNKNOWN)) {
-                continue;
-            }
-            String emojiResourceName = emoji.name().trim().replace(' ', '_').toLowerCase(Locale.US).concat("_emoji");
-            String emojiFileName = emojiResourceName + ".png";
-            ImageHelper.preproccessImageIfNecessary(context, emojiFileName, emojiResourceName);
-        }
-
-        ImageHelper.preproccessImageIfNecessary(context, "female_glasses.png", "female_glasses");
-        ImageHelper.preproccessImageIfNecessary(context, "female_noglasses.png", "female_noglasses");
-        ImageHelper.preproccessImageIfNecessary(context, "male_glasses.png", "male_glasses");
-        ImageHelper.preproccessImageIfNecessary(context, "male_noglasses.png", "male_noglasses");
-        ImageHelper.preproccessImageIfNecessary(context, "unknown_glasses.png", "unknown_glasses");
-        ImageHelper.preproccessImageIfNecessary(context, "unknown_noglasses.png", "unknown_noglasses");
-    }
-
     private void checkForCameraPermissions() {
         cameraPermissionsAvailable =
                 ContextCompat.checkSelfPermission(
@@ -365,7 +333,7 @@ public class MainActivity extends Activity
         mainLayout = (RelativeLayout) findViewById(R.id.main_layout);
         fpsPct = (TextView) findViewById(R.id.fps_value);
         fpsName = (TextView) findViewById(R.id.fps_name);
-        cameraView = (SurfaceView) findViewById(R.id.camera_preview);
+        cameraView = (SurfaceView) ((CameraView)findViewById(R.id.camera_view)).getSurfaceView();
         drawingView = (DrawingView) findViewById(R.id.drawing_view);
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
         cameraButton = (ImageButton) findViewById(R.id.camera_button);
@@ -513,94 +481,12 @@ public class MainActivity extends Activity
         //restore camera processing rate
         int detectorProcessRate = PreferencesUtils.getFrameProcessingRate(sharedPreferences);
         detector.setMaxProcessRate(detectorProcessRate);
-        drawingView.invalidateDimensions();
-
-        if (sharedPreferences.getBoolean("fps", isFPSVisible)) {    //restore isFPSMetricVisible
-            setFPSVisible(true);
-        } else {
-            setFPSVisible(false);
-        }
-
-        if (sharedPreferences.getBoolean("track", drawingView.getDrawPointsEnabled())) {  //restore isTrackingDotsVisible
-            setTrackPoints(true);
-        } else {
-            setTrackPoints(false);
-        }
-
-        if (sharedPreferences.getBoolean("appearance", drawingView.getDrawAppearanceMarkersEnabled())) {
-            detector.setDetectAllAppearances(true);
-            setShowAppearance(true);
-        } else {
-            detector.setDetectAllAppearances(false);
-            setShowAppearance(false);
-        }
-
-        if (sharedPreferences.getBoolean("emoji", drawingView.getDrawEmojiMarkersEnabled())) {
-            detector.setDetectAllEmojis(true);
-            setShowEmoji(true);
-        } else {
-            detector.setDetectAllEmojis(false);
-            setShowEmoji(false);
-        }
-
-        //populate metric displays
-        for (int n = 0; n < NUM_METRICS_DISPLAYED; n++) {
-            activateMetric(n, PreferencesUtils.getMetricFromPrefs(sharedPreferences, n));
-        }
+//        drawingView.invalidateDimensions();
 
         //if we are in multiface mode, we need to enable the detection of all emotions
         if (multiFaceModeEnabled) {
             detector.setDetectAllEmotions(true);
         }
-    }
-
-    /**
-     * Populates a TextView to display a metric name and readies a MetricDisplay to display the value.
-     * Uses reflection to:
-     * -enable the corresponding metric in the Detector object by calling Detector.setDetect<MetricName>()
-     * -save the Method object that will be invoked on the Face object received in onImageResults() to get the metric score
-     */
-    void activateMetric(int index, MetricsManager.Metrics metric) {
-
-        Method getFaceScoreMethod = null; //The method that will be used to get a metric score
-
-        try {
-            switch (metric.getType()) {
-                case Emotion:
-                    Detector.class.getMethod("setDetect" + MetricsManager.getCamelCase(metric), boolean.class).invoke(detector, true);
-                    metricNames[index].setText(MetricsManager.getUpperCaseName(metric));
-                    getFaceScoreMethod = Face.Emotions.class.getMethod("get" + MetricsManager.getCamelCase(metric));
-
-                    //The MetricDisplay for Valence is unique; it shades it color depending on the metric value
-                    if (metric == MetricsManager.Emotions.VALENCE) {
-                        metricDisplays[index].setIsShadedMetricView(true);
-                    } else {
-                        metricDisplays[index].setIsShadedMetricView(false);
-                    }
-                    break;
-                case Expression:
-                    Detector.class.getMethod("setDetect" + MetricsManager.getCamelCase(metric), boolean.class).invoke(detector, true);
-                    metricNames[index].setText(MetricsManager.getUpperCaseName(metric));
-                    getFaceScoreMethod = Face.Expressions.class.getMethod("get" + MetricsManager.getCamelCase(metric));
-                    break;
-                case Emoji:
-                    detector.setDetectAllEmojis(true);
-                    MetricsManager.Emojis emoji = ((MetricsManager.Emojis) metric);
-                    String metricTitle = emoji.getDisplayName(); // + " " + emoji.getUnicodeForEmoji();
-                    metricNames[index].setText(metricTitle);
-                    Log.d(LOG_TAG, "Getter Method: " + "get" + MetricsManager.getCamelCase(metric));
-                    getFaceScoreMethod = Face.Emojis.class.getMethod("get" + MetricsManager.getCamelCase(metric));
-                    break;
-            }
-        } catch (NoSuchMethodException e) {
-            Log.e(LOG_TAG, String.format("No such method while using reflection to generate methods for %s", metric.toString()), e);
-        } catch (InvocationTargetException e) {
-            Log.e(LOG_TAG, String.format("Invocation error while using reflection to generate methods for %s", metric.toString()), e);
-        } catch (IllegalAccessException e) {
-            Log.e(LOG_TAG, String.format("Illegal access error while using reflection to generate methods for %s", metric.toString()), e);
-        }
-
-        metricDisplays[index].setMetricToDisplay(metric, getFaceScoreMethod);
     }
 
     /**
@@ -736,7 +622,6 @@ public class MainActivity extends Activity
 
             //update metrics with latest face information. The metrics are displayed on a MetricView, a custom view with a .setScore() method.
             for (MetricDisplay metricDisplay : metricDisplays) {
-                updateMetricScore(metricDisplay, faces.get(0));
             }
 
             /**
@@ -785,117 +670,6 @@ public class MainActivity extends Activity
          * A screenshot of the drawing view is generated and processing continues via the callback
          * onBitmapGenerated() which calls processScreenshot().
          */
-    }
-
-    private void processScreenshot(Bitmap drawingViewBitmap, boolean alsoSaveRaw) {
-        if (mostRecentFrame == null) {
-            Toast.makeText(getApplicationContext(), "No frame detected, aborting screenshot", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!storagePermissionsAvailable) {
-            checkForStoragePermissions();
-            return;
-        }
-
-        Bitmap faceBitmap = ImageHelper.getBitmapFromFrame(mostRecentFrame);
-
-        if (faceBitmap == null) {
-            Log.e(LOG_TAG, "Unable to generate bitmap for frame, aborting screenshot");
-            return;
-        }
-
-        metricViewLayout.setDrawingCacheEnabled(true);
-        Bitmap metricsBitmap = Bitmap.createBitmap(metricViewLayout.getDrawingCache());
-        metricViewLayout.setDrawingCacheEnabled(false);
-
-        Bitmap finalScreenshot = Bitmap.createBitmap(faceBitmap.getWidth(), faceBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(finalScreenshot);
-        Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
-
-        canvas.drawBitmap(faceBitmap, 0, 0, paint);
-
-        float scaleFactor = ((float) faceBitmap.getWidth()) / ((float) drawingViewBitmap.getWidth());
-        int scaledHeight = Math.round(drawingViewBitmap.getHeight() * scaleFactor);
-        canvas.drawBitmap(drawingViewBitmap, null, new Rect(0, 0, faceBitmap.getWidth(), scaledHeight), paint);
-
-        scaleFactor = ((float) faceBitmap.getWidth()) / ((float) metricsBitmap.getWidth());
-        scaledHeight = Math.round(metricsBitmap.getHeight() * scaleFactor);
-        canvas.drawBitmap(metricsBitmap, null, new Rect(0, 0, faceBitmap.getWidth(), scaledHeight), paint);
-
-        metricsBitmap.recycle();
-        drawingViewBitmap.recycle();
-
-        Date now = new Date();
-        String timestamp = DateFormat.format("yyyy-MM-dd_hh-mm-ss", now).toString();
-        File pictureFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AffdexMe");
-        if (!pictureFolder.exists()) {
-            if (!pictureFolder.mkdir()) {
-                Log.e(LOG_TAG, "Unable to create directory: " + pictureFolder.getAbsolutePath());
-                return;
-            }
-        }
-
-        String screenshotFileName = timestamp + ".png";
-        File screenshotFile = new File(pictureFolder, screenshotFileName);
-
-        try {
-            ImageHelper.saveBitmapToFileAsPng(finalScreenshot, screenshotFile);
-        } catch (IOException e) {
-            String msg = "Unable to save screenshot";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-            Log.e(LOG_TAG, msg, e);
-            return;
-        }
-        ImageHelper.addPngToGallery(getApplicationContext(), screenshotFile);
-
-        if (alsoSaveRaw) {
-            String rawScreenshotFileName = timestamp + "_raw.png";
-            File rawScreenshotFile = new File(pictureFolder, rawScreenshotFileName);
-
-            try {
-                ImageHelper.saveBitmapToFileAsPng(faceBitmap, rawScreenshotFile);
-            } catch (IOException e) {
-                String msg = "Unable to save screenshot";
-                Log.e(LOG_TAG, msg, e);
-            }
-            ImageHelper.addPngToGallery(getApplicationContext(), rawScreenshotFile);
-        }
-
-        faceBitmap.recycle();
-        finalScreenshot.recycle();
-
-        String fileSavedMessage = "Screenshot saved to: " + screenshotFile.getPath();
-        Toast.makeText(getApplicationContext(), fileSavedMessage, Toast.LENGTH_SHORT).show();
-        Log.d(LOG_TAG, fileSavedMessage);
-    }
-
-    /**
-     * Use the method that we saved in activateMetric() to get the metric score and display it
-     */
-    void updateMetricScore(MetricDisplay metricDisplay, Face face) {
-
-        MetricsManager.Metrics metric = metricDisplay.getMetricToDisplay();
-        float score = Float.NaN;
-
-        try {
-            switch (metric.getType()) {
-                case Emotion:
-                    score = (Float) metricDisplay.getFaceScoreMethod().invoke(face.emotions);
-                    break;
-                case Expression:
-                    score = (Float) metricDisplay.getFaceScoreMethod().invoke(face.expressions);
-                    break;
-                case Emoji:
-                    score = (Float) metricDisplay.getFaceScoreMethod().invoke(face.emojis);
-                    break;
-                default:
-                    throw new Exception("Unknown Metric Type: " + metric.getType().toString());
-            }
-        } catch (Exception e) {
-            Log.e(LOG_TAG, String.format("Error using reflecting to get %s score from face.", metric.toString()));
-        }
-        metricDisplay.setScore(score);
     }
 
     /**
@@ -1114,11 +888,5 @@ public class MainActivity extends Activity
 
     @Override
     public void onBitmapGenerated(@NonNull final Bitmap bitmap) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                processScreenshot(bitmap, STORE_RAW_SCREENSHOTS);
-            }
-        });
     }
 }
