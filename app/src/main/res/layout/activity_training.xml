@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:keepScreenOn="true"
+    tools:context=".MainActivity">
+
+    <com.affectiva.affdexme.CameraView
+        android:id="@+id/camera_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+    <com.affectiva.affdexme.DrawingView
+        android:id="@+id/drawing_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        custom:measurements_color="#DDDDDD"
+        custom:measurements_lower_spacing="@dimen/measurements_lower_text_spacing"
+        custom:measurements_text_border_color="@color/letter_gray"
+        custom:measurements_text_border_thickness="@integer/measurements_text_border_thickness"
+        custom:measurements_text_size="@dimen/measurements_text_size"
+        custom:measurements_upper_spacing="@dimen/measurements_upper_text_spacing" />
+
+</RelativeLayout>
+
+

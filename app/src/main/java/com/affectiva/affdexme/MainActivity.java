@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -745,6 +746,12 @@ public class MainActivity extends Activity
              */
             if (drawingView.getDrawPointsEnabled() || drawingView.getDrawAppearanceMarkersEnabled() || drawingView.getDrawEmojiMarkersEnabled()) {
 
+                PointF points[] = faces.get(0).getFacePoints();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (PointF pointF : points) {
+                    stringBuilder.append(String.format("(%.3f,%.3f),", pointF.x, pointF.y));
+                }
+                Log.d(TAG, "MainActivity face points:" + stringBuilder.toString());
                 drawingView.updatePoints(faces, mirrorPoints);
             }
 
@@ -950,20 +957,8 @@ public class MainActivity extends Activity
             cameraButton.setVisibility(View.VISIBLE);
             screenshotButton.setVisibility(View.VISIBLE);
 
-            //We display the navigation bar again
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         } else {
 
-            //We hide the navigation bar
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
             settingsButton.setVisibility(View.INVISIBLE);
             cameraButton.setVisibility(View.INVISIBLE);
             screenshotButton.setVisibility(View.INVISIBLE);
@@ -1020,9 +1015,12 @@ public class MainActivity extends Activity
         startActivity(new Intent(this, SettingsActivity.class));
     }
 
+    public static final String TAG = MainActivity.class.getSimpleName();
+
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
     public void onCameraSizeSelected(int cameraWidth, int cameraHeight, ROTATE rotation) {
+        Log.d(TAG, String.format("MainActivity.onFrameSizeSelected width:%d,height %d, rotation: %s", cameraWidth, cameraHeight, rotation));
         if (rotation == ROTATE.BY_90_CCW || rotation == ROTATE.BY_90_CW) {
             cameraPreviewWidth = cameraHeight;
             cameraPreviewHeight = cameraWidth;
@@ -1059,6 +1057,7 @@ public class MainActivity extends Activity
                 }
 
                 drawingView.updateViewDimensions(newWidth, newHeight, cameraPreviewWidth, cameraPreviewHeight);
+                Log.d(TAG, String.format("MainActivity.onFrameSizeSelected width:%d,height %d, rotation: %s", newWidth, newHeight, cameraPreviewAspectRatio));
 
                 ViewGroup.LayoutParams params = mainLayout.getLayoutParams();
                 params.height = newHeight;
