@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_name">你好，%s</string>
+    <string name="label_finish_gretting">玩得真棒，再玩一次？</string>
+</resources>
