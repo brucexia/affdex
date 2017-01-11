@@ -135,7 +135,7 @@ public class MainActivity extends Activity
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //To maximize UI space, we declare our app to be full-screen
 //        preproccessMetricImages();
-        setContentView(R.layout.activity_main1);
+        setContentView(R.layout.activity_main);
         initializeUI();
         checkForCameraPermissions();
         determineCameraAvailability();
@@ -333,7 +333,7 @@ public class MainActivity extends Activity
         mainLayout = (RelativeLayout) findViewById(R.id.main_layout);
         fpsPct = (TextView) findViewById(R.id.fps_value);
         fpsName = (TextView) findViewById(R.id.fps_name);
-        cameraView = (SurfaceView) ((CameraView)findViewById(R.id.camera_view)).getSurfaceView();
+        cameraView = (SurfaceView) findViewById(R.id.camera_view);
         drawingView = (DrawingView) findViewById(R.id.drawing_view);
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
         cameraButton = (ImageButton) findViewById(R.id.camera_button);
@@ -342,40 +342,11 @@ public class MainActivity extends Activity
         pleaseWaitTextView = (TextView) findViewById(R.id.please_wait_textview);
         Button retryPermissionsButton = (Button) findViewById(R.id.retryPermissionsButton);
 
-        //Initialize views to display metrics
-        metricNames = new TextView[NUM_METRICS_DISPLAYED];
-        metricNames[0] = (TextView) findViewById(R.id.metric_name_0);
-        metricNames[1] = (TextView) findViewById(R.id.metric_name_1);
-        metricNames[2] = (TextView) findViewById(R.id.metric_name_2);
-        metricNames[3] = (TextView) findViewById(R.id.metric_name_3);
-        metricNames[4] = (TextView) findViewById(R.id.metric_name_4);
-        metricNames[5] = (TextView) findViewById(R.id.metric_name_5);
-        metricDisplays = new MetricDisplay[NUM_METRICS_DISPLAYED];
-        metricDisplays[0] = (MetricDisplay) findViewById(R.id.metric_pct_0);
-        metricDisplays[1] = (MetricDisplay) findViewById(R.id.metric_pct_1);
-        metricDisplays[2] = (MetricDisplay) findViewById(R.id.metric_pct_2);
-        metricDisplays[3] = (MetricDisplay) findViewById(R.id.metric_pct_3);
-        metricDisplays[4] = (MetricDisplay) findViewById(R.id.metric_pct_4);
-        metricDisplays[5] = (MetricDisplay) findViewById(R.id.metric_pct_5);
 
         scoreView = (TextView) findViewById(R.id.scoreView);
         scoreView.setText(String.valueOf(sharedPreferences.getInt("score", 0)));
         //Load Application Font and set UI Elements to use it
         Typeface face = Typeface.createFromAsset(getAssets(), "fonts/Square.ttf");
-        for (TextView textView : metricNames) {
-            textView.setTypeface(face);
-        }
-        for (MetricDisplay metricDisplay : metricDisplays) {
-            metricDisplay.setTypeface(face);
-        }
-        fpsPct.setTypeface(face);
-        fpsName.setTypeface(face);
-        drawingView.setTypeface(face);
-        pleaseWaitTextView.setTypeface(face);
-
-        //Hide left and right metrics by default (will be made visible when face detection starts)
-        leftMetricsLayout.setAlpha(0);
-        rightMetricsLayout.setAlpha(0);
 
         /**
          * This app uses two SurfaceView objects: one to display the camera image and the other to draw facial tracking dots.
@@ -399,22 +370,6 @@ public class MainActivity extends Activity
                 drawingView.reset();
             }
         });
-        /*
-         * This app sets the View.SYSTEM_UI_FLAG_HIDE_NAVIGATION flag. Unfortunately, this flag causes
-         * Android to steal the first touch event after the navigation bar has been hidden, a touch event
-         * which should be used to make our menu visible again. Therefore, we attach a listener to be notified
-         * when the navigation bar has been made visible again, which corresponds to the touch event that Android
-         * steals. If the menu bar was not visible, we make it visible.
-         */
-        activityLayout.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int uiCode) {
-                if ((uiCode == 0) && (!isMenuVisible)) {
-                    setMenuVisible(true);
-                }
-
-            }
-        });
 
         retryPermissionsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -429,7 +384,7 @@ public class MainActivity extends Activity
          * the camera. If a SurfaceView is passed in as the last argument to the constructor,
          * that view will be painted with what the camera sees.
          */
-        detector = new CameraDetector(this, cameraType, cameraView, (multiFaceModeEnabled ? MAX_SUPPORTED_FACES : 1), Detector.FaceDetectorMode.LARGE_FACES);
+        detector = new CameraDetector(this, cameraType, cameraView, 1, Detector.FaceDetectorMode.LARGE_FACES);
         detector.setImageListener(this);
         detector.setFaceListener(this);
         detector.setOnCameraEventListener(this);
@@ -447,17 +402,6 @@ public class MainActivity extends Activity
         isMenuShowingForFirstTime = true;
     }
 
-    private void setMultiFaceModeEnabled(boolean isEnabled) {
-
-        //if setting change is necessary
-        if (isEnabled != multiFaceModeEnabled) {
-            // change the setting, stop the detector, and reinitialize it to change the setting
-            multiFaceModeEnabled = isEnabled;
-            stopDetector();
-            initializeCameraDetector();
-        }
-    }
-
     /*
      * We use the Shared Preferences object to restore application settings.
      */
@@ -469,13 +413,6 @@ public class MainActivity extends Activity
             setCameraType(CameraDetector.CameraType.CAMERA_FRONT);
         } else {
             setCameraType(CameraDetector.CameraType.CAMERA_BACK);
-        }
-
-        //restore the multiface mode setting to reset the detector if necessary
-        if (sharedPreferences.getBoolean("multiface", false)) { // default to false
-            setMultiFaceModeEnabled(true);
-        } else {
-            setMultiFaceModeEnabled(false);
         }
 
         //restore camera processing rate
@@ -525,18 +462,6 @@ public class MainActivity extends Activity
 
         startDetector();
 
-        if (!drawingView.isDimensionsNeeded()) {
-            progressBarLayout.setVisibility(View.GONE);
-        }
-        resetFPSCalculations();
-        cameraView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isMenuShowingForFirstTime) {
-                    setMenuVisible(false);
-                }
-            }
-        }, 5000);
     }
 
     void startDetector() {
@@ -555,22 +480,13 @@ public class MainActivity extends Activity
 
     @Override
     public void onFaceDetectionStarted() {
-        leftMetricsLayout.animate().alpha(1); //make left and right metrics appear
-        rightMetricsLayout.animate().alpha(1);
 
-        resetFPSCalculations(); //Since the FPS may be different whether a face is being tracked or not, reset variables.
     }
 
     @Override
     public void onFaceDetectionStopped() {
-        performFaceDetectionStoppedTasks();
     }
 
-    void performFaceDetectionStoppedTasks() {
-        leftMetricsLayout.animate().alpha(0); //make left and right metrics disappear
-        rightMetricsLayout.animate().alpha(0);
-        resetFPSCalculations(); //Since the FPS may be different whether a face is being tracked or not, reset variables.
-    }
 
     void updateScore(Face face) {
         if (scoringTimer == null) {
@@ -620,25 +536,14 @@ public class MainActivity extends Activity
         } else if (faces.size() == 1) {
             metricViewLayout.setVisibility(View.VISIBLE);
 
-            //update metrics with latest face information. The metrics are displayed on a MetricView, a custom view with a .setScore() method.
-            for (MetricDisplay metricDisplay : metricDisplays) {
+            PointF points[] = faces.get(0).getFacePoints();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (PointF pointF : points) {
+                stringBuilder.append(String.format("(%.3f,%.3f),", pointF.x, pointF.y));
             }
-
-            /**
-             * If the user has selected to have any facial attributes drawn, we use face.getFaces() to send those points
-             * to our drawing thread and also inform the thread what the valence score was, as that will determine the color
-             * of the bounding box.
-             */
-            if (drawingView.getDrawPointsEnabled() || drawingView.getDrawAppearanceMarkersEnabled() || drawingView.getDrawEmojiMarkersEnabled()) {
-
-                PointF points[] = faces.get(0).getFacePoints();
-                StringBuilder stringBuilder = new StringBuilder();
-                for (PointF pointF : points) {
-                    stringBuilder.append(String.format("(%.3f,%.3f),", pointF.x, pointF.y));
-                }
-                Log.d(TAG, "MainActivity face points:" + stringBuilder.toString());
-                drawingView.updatePoints(faces, mirrorPoints);
-            }
+            Log.d(TAG, String.format("onImageResults: frame w:%d,frame h:%d, orientation %s", image.getWidth(), image.getHeight(), image.getTargetRotation()));
+            Log.d(TAG, String.format("MainActivity face points %s:", stringBuilder.toString()));
+            drawingView.updatePoints(faces, mirrorPoints);
 
         } else {
             // metrics overlay is hidden in multi face mode
@@ -699,8 +604,6 @@ public class MainActivity extends Activity
         super.onPause();
         progressBarLayout.setVisibility(View.VISIBLE);
 
-        performFaceDetectionStoppedTasks();
-
         stopDetector();
     }
 
@@ -750,31 +653,6 @@ public class MainActivity extends Activity
             return true;
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    //If the user selects to have facial tracking dots drawn, inform our drawing thread.
-    void setTrackPoints(boolean b) {
-        drawingView.setDrawPointsEnabled(b);
-    }
-
-    void setShowAppearance(boolean b) {
-        drawingView.setDrawAppearanceMarkersEnabled(b);
-    }
-
-    void setShowEmoji(boolean b) {
-        drawingView.setDrawEmojiMarkersEnabled(b);
-    }
-
-
-    void setFPSVisible(boolean b) {
-        isFPSVisible = b;
-        if (b) {
-            fpsName.setVisibility(View.VISIBLE);
-            fpsPct.setVisibility(View.VISIBLE);
-        } else {
-            fpsName.setVisibility(View.INVISIBLE);
-            fpsPct.setVisibility(View.INVISIBLE);
-        }
     }
 
     @Override
@@ -877,8 +755,6 @@ public class MainActivity extends Activity
                 default:
                     Log.e(LOG_TAG, "Unknown camera type selected");
             }
-
-            performFaceDetectionStoppedTasks();
 
             detector.setCameraType(cameraType);
             preferencesEditor.putString("cameraType", cameraType.name());

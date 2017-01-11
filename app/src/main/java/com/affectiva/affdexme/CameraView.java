@@ -15,7 +15,7 @@ import com.affectiva.android.affdex.sdk.Frame;
  * <p>
  * This view consists of a SurfaceView object contained inside a FrameLayout.
  */
-public class CameraView extends FrameLayout implements CameraHelper.OnCameraHelperEventListener {
+public class CameraView extends SurfaceView implements CameraHelper.OnCameraHelperEventListener {
 
     interface OnCameraViewEventListener {
         void onCameraFrameAvailable(byte[] frame, int width, int height, Frame.ROTATE rotation);
@@ -29,7 +29,7 @@ public class CameraView extends FrameLayout implements CameraHelper.OnCameraHelp
 
     public static String LOG_TAG = "Affectiva";
 
-    SurfaceView surfaceView;
+//    SurfaceView surfaceView;
     CameraHelper cameraHelper;
     OnCameraViewEventListener listener;
 
@@ -62,41 +62,41 @@ public class CameraView extends FrameLayout implements CameraHelper.OnCameraHelp
             we can neglect that step in this case because we know we want our SurfaceView to take up as space as possible
             while matching the camera's aspect ratio.
          */
-        surfaceView = new SurfaceView(context) {
-            @Override
-            public void onMeasure(int widthSpec, int heightSpec) {
-                int measureWidth = MeasureSpec.getSize(widthSpec);
-                int measureHeight = MeasureSpec.getSize(heightSpec);
-                int width;
-                int height;
-                if (previewHeight == 0 || previewWidth == 0) {
-                    width = measureWidth;
-                    height = measureHeight;
-                } else {
-                    float viewAspectRatio = (float) measureWidth / measureHeight;
-                    float cameraPreviewAspectRatio = (float) previewWidth / previewHeight;
-
-                    if (cameraPreviewAspectRatio > viewAspectRatio) {
-                        width = measureWidth;
-                        height = (int) (measureWidth / cameraPreviewAspectRatio);
-                    } else {
-                        width = (int) (measureHeight * cameraPreviewAspectRatio);
-                        height = measureHeight;
-                    }
-                }
-                if (listener != null) {
-                    listener.onSurfaceViewSizeChanged();
-                }
-                setMeasuredDimension(width, height);
-            }
-        };
-        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        params.gravity = Gravity.CENTER;
-        surfaceView.setLayoutParams(params);
-        this.addView(surfaceView);
+//        surfaceView = new SurfaceView(context) {
+//            @Override
+//            public void onMeasure(int widthSpec, int heightSpec) {
+//                int measureWidth = MeasureSpec.getSize(widthSpec);
+//                int measureHeight = MeasureSpec.getSize(heightSpec);
+//                int width;
+//                int height;
+//                if (previewHeight == 0 || previewWidth == 0) {
+//                    width = measureWidth;
+//                    height = measureHeight;
+//                } else {
+//                    float viewAspectRatio = (float) measureWidth / measureHeight;
+//                    float cameraPreviewAspectRatio = (float) previewWidth / previewHeight;
+//
+//                    if (cameraPreviewAspectRatio > viewAspectRatio) {
+//                        width = measureWidth;
+//                        height = (int) (measureWidth / cameraPreviewAspectRatio);
+//                    } else {
+//                        width = (int) (measureHeight * cameraPreviewAspectRatio);
+//                        height = measureHeight;
+//                    }
+//                }
+//                if (listener != null) {
+//                    listener.onSurfaceViewSizeChanged();
+//                }
+//                setMeasuredDimension(width, height);
+//            }
+//        };
+//        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//        params.gravity = Gravity.CENTER;
+//        surfaceView.setLayoutParams(params);
+//        this.addView(surfaceView);
 
         //Init cameraHelper, the class which controls our camera.
-        cameraHelper = new CameraHelper(context, surfaceView, ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay());
+        cameraHelper = new CameraHelper(context, this, ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay());
         cameraHelper.setOnCameraHelperEventListener(this);
     }
 
@@ -104,9 +104,9 @@ public class CameraView extends FrameLayout implements CameraHelper.OnCameraHelp
         this.listener = listener;
     }
 
-    public SurfaceView getSurfaceView() {
-        return surfaceView;
-    }
+//    public SurfaceView getSurfaceView() {
+//        return surfaceView;
+//    }
 
     public void startCamera(CameraHelper.CameraType type) {
         cameraHelper.startCamera(type);
@@ -140,7 +140,8 @@ public class CameraView extends FrameLayout implements CameraHelper.OnCameraHelp
             previewWidth = width;
             previewHeight = height;
         }
-        surfaceView.requestLayout();
+//        surfaceView.requestLayout();
+        requestLayout();
         listener.onFrameSizeSelected(width,height,rotation);
     }
 

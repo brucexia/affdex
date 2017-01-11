@@ -29,6 +29,7 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import com.affectiva.affdexme.utils.convexhull.FastConvexHull;
+import com.affectiva.android.affdex.sdk.Frame;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
 import java.io.FileNotFoundException;
@@ -57,7 +58,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
     private Map<String, Bitmap> emojiMarkerBitmapToEmojiTypeMap;
     private SurfaceHolder surfaceHolder;
     private DrawingThread drawingThread; //DrawingThread object
-    private DrawingViewConfig drawingViewConfig;
+    public DrawingViewConfig drawingViewConfig;
     private DrawingThreadEventListener listener;
     FaceAnimationV1 faceAnimation;
 
@@ -386,7 +387,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         void setThickness(int thickness) {
-            boundingBoxPaint.setStrokeWidth(thickness);
+            boundingBoxPaint.setStrokeWidth(1);
         }
 
         //Inform thread face detection has stopped, so pending faces are no longer valid.
@@ -483,7 +484,10 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             //Coordinates around which to draw bounding box.
             //Default to an 'inverted' box, where the absolute max and min values of the surface view are inside-out
             Rect boundingRect = new Rect(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
-            List<PointF> transformedPoints = transformFacePoints(face.getFacePoints(), mirrorPoints);
+            PointF[] pointFs = face.getFacePoints();
+
+            List<PointF> transformedPoints = transformFacePoints(pointFs, mirrorPoints);
+
             for (PointF point : transformedPoints) {
                 //transform from the camera coordinates to our screen coordinates
                 //The camera preview is displayed as a mirror, so X pts have to be mirrored back.
@@ -496,34 +500,35 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
                 //Draw facial tracking dots.
                 if (config.isDrawPointsEnabled) {
-                    c.drawCircle(x, y, config.drawThickness, trackingPointsPaint);
+                    c.drawCircle(x, y, 1, trackingPointsPaint);
                 }
             }
 
             //Draw the bounding box.
-            if (config.isDrawPointsEnabled) {
-                drawBoundingBox(c, face, boundingRect);
-            }
+//            if (config.isDrawPointsEnabled) {
+            drawBoundingBox(c, face, boundingRect);
+//            }
 
-            float heightOffset = findNecessaryHeightOffset(boundingRect, face);
+//            float heightOffset = findNecessaryHeightOffset(boundingRect, face);
+//
+//            //Draw the Appearance markers (gender / glasses)
+//            if (config.isDrawAppearanceMarkersEnabled) {
+//                drawAppearanceMarkers(c, face, boundingRect, heightOffset);
+//            }
+//
+//            //Draw the Emoji markers
+//            if (config.isDrawEmojiMarkersEnabled) {
+//                drawDominantEmoji(c, face, boundingRect, heightOffset);
+//            }
+//
+//            //Only draw the dominant emotion bar in multiface mode
+//            if (isMultiFaceMode) {
+//                drawDominantEmotion(c, face, boundingRect);
+//            }
 
-            //Draw the Appearance markers (gender / glasses)
-            if (config.isDrawAppearanceMarkersEnabled) {
-                drawAppearanceMarkers(c, face, boundingRect, heightOffset);
-            }
-
-            //Draw the Emoji markers
-            if (config.isDrawEmojiMarkersEnabled) {
-                drawDominantEmoji(c, face, boundingRect, heightOffset);
-            }
-
-            //Only draw the dominant emotion bar in multiface mode
-            if (isMultiFaceMode) {
-                drawDominantEmotion(c, face, boundingRect);
-            }
             if (true) {
 //            if (face.emotions.getJoy() > 30) {
-                            PointF noseTip = transformedPoints.get(12);
+                PointF noseTip = transformedPoints.get(12);
                 switch (state) {
                     case STATE_BIRD: {
                         Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(null);
@@ -550,7 +555,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                         Paint paint1 = new Paint();
                         paint1.setColor(Color.RED);
                         paint1.setStyle(Paint.Style.STROKE);
-                        paint1.setStrokeWidth(10);
+                        paint1.setStrokeWidth(2);
                         paint1.setStrokeJoin(Paint.Join.ROUND);
                         drawOutlineQuad(getEdgePoints(transformedPoints), c, paint1);
                         if (timer == null) {
@@ -610,7 +615,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         void drawFaceAnimation(Canvas c, PointF noseTip) {
             int index = faceAnimation.getCurrentFrameIndex();
-            c.drawCircle(noseTip.x, noseTip.y, 300 + index * 10, faceAnimation.getCurrentStrokePaint(index));
+            c.drawCircle(noseTip.x, noseTip.y, 100 + index * 10, faceAnimation.getCurrentStrokePaint(index));
         }
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {

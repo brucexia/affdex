@@ -36,7 +36,9 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
 
     public interface OnCameraHelperEventListener {
         void onFrameAvailable(byte[] frame, int width, int height, Frame.ROTATE rotation);
+
         void onFrameSizeSelected(int width, int height, Frame.ROTATE rotation);
+
         void onCameraStarted(boolean success, Throwable error);
     }
 
@@ -118,11 +120,11 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
         "Called" by background thread when Camera creation has finished. (This method runs on the main thread)
      */
     private void cameraStarted() {
-        Log.e(LOG_TAG,"cameraStarted");
+        Log.e(LOG_TAG, "cameraStarted");
         if (cameraState == CameraHelperState.CREATING) {
             synchronized (cameraWrapper) {
                 if (cameraWrapper.error == null) {
-                    Log.e(LOG_TAG,"camera creation successful");
+                    Log.e(LOG_TAG, "camera creation successful");
                     cameraState = CameraHelperState.STARTED;
                     if (listener != null) {
                         listener.onCameraStarted(true, null);
@@ -132,7 +134,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
                         startPreviewing(holder);
                     }
                 } else {
-                    Log.e(LOG_TAG,"camera creation error");
+                    Log.e(LOG_TAG, "camera creation error");
                     closeCameraSafe(); //sets state to STOPPED
                     if (listener != null) {
                         listener.onCameraStarted(false, cameraWrapper.error);
@@ -140,7 +142,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
                 }
             }
         } else {
-            Log.e(LOG_TAG,"Camera creation background thread reports it returned, but we were not expecting a camera to be created. Releasing resources.");
+            Log.e(LOG_TAG, "Camera creation background thread reports it returned, but we were not expecting a camera to be created. Releasing resources.");
             closeCameraSafe();
         }
     }
@@ -211,7 +213,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
                 //attempt to block until cameraThread has finished, then close camera
                 cameraThread.join();
             } catch (InterruptedException e) {
-                Log.e(LOG_TAG,"Attempt to stop background thread was interrupted. Will try to release all resources.");
+                Log.e(LOG_TAG, "Attempt to stop background thread was interrupted. Will try to release all resources.");
             } finally {
                 mHandler.removeMessages(MainThreadHandler.CAMERA_CREATED);
                 closeCameraSafe(); //sets state to STOPPED
@@ -261,7 +263,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
     // Implement Camera.PreviewCallback interface
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        if (listener!= null) {
+        if (listener != null) {
             listener.onFrameAvailable(data, cameraWrapper.previewWidth, cameraWrapper.previewHeight, frameRotation);
         }
         // put the buffer back in the queue, so that it can be used again
@@ -349,14 +351,16 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
         }
         cameraWrapper.camera.setDisplayOrientation(rotation);
 
+        Log.d(CameraHelper.class.getSimpleName(), String.format("setCameraDisplayOrientation previewWidth %d, previewHeight %d, cameraInfo orientation %d, displayOrientation %d, frameRotation %s",
+                cameraWrapper.previewWidth, cameraWrapper.previewHeight, info.orientation, rotation, frameRotation));
         //Now that rotation has been determined (or updated) inform listener of new frame size.
-        if (listener!= null) {
+        if (listener != null) {
             listener.onFrameSizeSelected(cameraWrapper.previewWidth, cameraWrapper.previewHeight, frameRotation);
         }
     }
 
     private void computeFrameRotation(int rotation) {
-        switch(rotation) {
+        switch (rotation) {
             case 0:
                 frameRotation = Frame.ROTATE.NO_ROTATION;
                 break;
@@ -416,6 +420,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
         }
 
         Camera open(int cameraId) {
+            Log.d("aquireCamera", "trying to open camerer "+cameraId);
             return Camera.open(cameraId);
         }
 
@@ -464,7 +469,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
                     cameraHelper.cameraStarted();
                     break;
                 default:
-                    Log.e(LOG_TAG,"Received unhandled message of code " + String.valueOf(msg.what));
+                    Log.e(LOG_TAG, "Received unhandled message of code " + String.valueOf(msg.what));
                     break;
             }
 
@@ -540,6 +545,7 @@ class CameraHelper extends OrientationEventListener implements SurfaceHolder.Cal
                     minDiff = Math.abs(size.height - targetHeight);
                 }
             }
+            Log.d(CameraHelper.class.getSimpleName(), String.format("setPreviewSize ", optimalSize.width, optimalSize.height));
             cameraParams.setPreviewSize(optimalSize.width, optimalSize.height);
         }
     }

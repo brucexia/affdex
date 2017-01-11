@@ -57,7 +57,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main1);
+        setContentView(R.layout.activity_training);
 
         mainLayout = (ViewGroup) findViewById(R.id.main_layout);
         //set up metrics view
@@ -70,7 +70,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         drawingView = (DrawingView) findViewById(R.id.drawing_view);
 
         drawingView.setZOrderMediaOverlay(true);
-        cameraView.getSurfaceView().setZOrderMediaOverlay(false);
+        cameraView.setZOrderMediaOverlay(false);
         drawingView.setFaceAnimation(new FaceAnimationV1(this));
         drawingView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +91,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         if (isCameraStarted) {
             cameraView.stopCamera();
         }
-        cameraView.startCamera(CameraHelper.CameraType.CAMERA_FRONT);
+        cameraView.startCamera(CameraHelper.CameraType.CAMERA_BACK);
         isCameraStarted = true;
         asyncDetector.reset();
     }
@@ -162,27 +162,30 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         if (timeStamp < lastReceivedTimestamp)
             throw new RuntimeException("Got a timestamp out of order!");
         lastReceivedTimestamp = timeStamp;
-        Log.e("MainActivity", String.valueOf(timeStamp));
 
         if (faces == null || faces.isEmpty())
             return; //No Face Detected
-        PointF points[] = faces.get(0).getFacePoints();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (PointF pointF : points) {
-            stringBuilder.append(String.format("(%.3f,%.3f),", pointF.x, pointF.y));
-        }
-        Log.d(TAG, "TrainingActivity face points:" + stringBuilder.toString());
-        drawingView.updatePoints(faces, true);
+//        PointF points[] = faces.get(0).getFacePoints();
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (PointF pointF : points) {
+//            stringBuilder.append(String.format("(%.0f,%.0f),", pointF.x, pointF.y));
+//        }
+//        Log.d(TAG, String.format("TrainingActivity.onImageResults: frame w:%d,frame h:%d, orientation %s", image.getWidth(), image.getHeight(), image.getTargetRotation()));
+
+//        Log.d(TAG, "TrainingActivity face points:" + stringBuilder.toString());
+        transformPoints(faces.get(0).getFacePoints(), image.getWidth(), image.getHeight(), image.getTargetRotation());
+
+        drawingView.updatePoints(faces, false);
 
         numberSDKFramesReceived += 1;
-        Log.d("onImageResults", String.format("SDK: %.3f", 1000f * (float) numberSDKFramesReceived / (SystemClock.elapsedRealtime() - lastSDKFPSResetTime)));
 
     }
 
     public static final String TAG = TrainingActivity.class.getSimpleName();
+
     @Override
     public void onFrameSizeSelected(int width, int height, Frame.ROTATE rotation) {
-        Log.d(TAG,String.format("onFrameSizeSelected width:%d,height %d, rotation: %s",width,height,rotation));
+        Log.d(TAG, String.format("onFrameSizeSelected width:%d,height %d, rotation: %s", width, height, rotation));
         if (rotation == Frame.ROTATE.BY_90_CCW || rotation == Frame.ROTATE.BY_90_CW) {
             cameraPreviewWidth = height;
             cameraPreviewHeight = width;
@@ -217,7 +220,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
                     newWidth = (int) (layoutHeight * cameraPreviewAspectRatio);
                     newHeight = layoutHeight;
                 }
-                Log.d(TAG,String.format("onFrameSizeSelected width:%d,height %d, rotation: %s",newWidth,newHeight,cameraPreviewAspectRatio));
+                Log.d(TAG, String.format("onFrameSizeSelected width:%d,height %d, rotation: %s", newWidth, newHeight, cameraPreviewAspectRatio));
 
                 drawingView.updateViewDimensions(newWidth, newHeight, cameraPreviewWidth, cameraPreviewHeight);
 
@@ -237,10 +240,32 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     }
 
     static Frame createFrameFromData(byte[] frameData, int width, int height, Frame.ROTATE rotation) {
-        Log.d(TAG,String.format("createFrameFromData width:%d,height %d, rotation: %s",width,height,rotation));
+        Log.d(TAG, String.format("createFrameFromData width:%d,height %d, rotation: %s", width, height, rotation));
 
         Frame.ByteArrayFrame frame = new Frame.ByteArrayFrame(frameData, width, height, Frame.COLOR_FORMAT.YUV_NV21);
         frame.setTargetRotation(rotation);
         return frame;
+    }
+
+    void transformPoints(PointF[] points, int width, int height, Frame.ROTATE rotation) {
+//        Frame.revertPointRotation(points, width, height, rotation);
+        switch (rotation) {
+            case BY_90_CCW: {
+                for (PointF pointF : points) {
+                    float tmp = pointF.x;
+                    pointF.x =  pointF.y;
+                    pointF.y = tmp;
+                }
+            }
+            break;
+            case BY_90_CW: {
+                for (PointF pointF : points) {
+                    float tmp = pointF.x;
+                    pointF.x = pointF.y;
+                    pointF.y = width - tmp;
+                }
+                break;
+            }
+        }
     }
 }

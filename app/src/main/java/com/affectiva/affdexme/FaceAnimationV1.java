@@ -35,7 +35,7 @@ public class FaceAnimationV1 {
         Paint paint3 = new Paint();
         paint3.setColor(colors[index]);
         paint3.setStyle(Paint.Style.STROKE);
-        paint3.setStrokeWidth(10);
+        paint3.setStrokeWidth(1);
         paint3.setStrokeJoin(Paint.Join.ROUND);
         return paint3;
     }
