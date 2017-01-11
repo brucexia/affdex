@@ -1,6 +1,7 @@
 package com.moreants.care;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -20,7 +21,9 @@ import java.util.List;
  * <p>
  * This app also contains sample code for using the camera.
  */
-public class TrainingActivity extends Activity implements CameraView.OnCameraViewEventListener, AsyncFrameDetector.OnDetectorEventListener {
+public class TrainingActivity extends Activity implements CameraView.OnCameraViewEventListener,
+        AsyncFrameDetector.OnDetectorEventListener,
+        TrainingController.TrainingControllerInterface {
 
     private static final String LOG_TAG = "Affectiva";
 
@@ -28,8 +31,6 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
 
     //state booleans
     boolean isCameraStarted = false;
-    boolean isCameraFront = true;
-    boolean isCameraRequestedByUser = false;
     boolean isSDKRunning = false;
 
     //variables used to determine the FPS rates of frames sent by the camera and processed by the SDK
@@ -49,6 +50,8 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     ViewGroup mainLayout;
     int cameraPreviewWidth = 0;
     int cameraPreviewHeight = 0;
+
+    TrainingController trainingController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,20 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         });
         asyncDetector = new AsyncFrameDetector(this);
         asyncDetector.setOnDetectorEventListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        trainingController = TrainingController.getInstance();
+        trainingController.addListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        trainingController.stopTraining();
+        trainingController.removeListener(this);
     }
 
     void resetFPS() {
@@ -249,7 +266,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
             case BY_90_CCW: {
                 for (PointF pointF : points) {
                     float tmp = pointF.x;
-                    pointF.x =  pointF.y;
+                    pointF.x = pointF.y;
                     pointF.y = tmp;
                 }
             }
@@ -263,5 +280,13 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
                 break;
             }
         }
+    }
+
+    @Override
+    public void onComplete() {
+        Intent intent = new Intent(this, FinishActivity.class);
+        startActivity(intent);
+        if (!isFinishing())
+            finish();
     }
 }

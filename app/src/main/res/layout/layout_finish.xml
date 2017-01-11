@@ -2,26 +2,73 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_splash"
-    android:orientation="vertical">
+    android:background="@drawable/bg_splash">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/text_break" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/text_replay" />
+        android:id="@+id/logo"
+        android:layout_width="@dimen/small_logo_width"
+        android:layout_height="@dimen/small_logo_height"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/logo" />
 
     <TextView
+        android:id="@+id/labelFinish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/logo"
         android:layout_centerHorizontal="true"
-        android:text="@string/welcome_name" />
+        android:layout_marginTop="5dp"
+        android:text="@string/label_finish_gretting"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/labelFinish"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp">
+
+        <LinearLayout
+            android:id="@+id/layoutBreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/btn_home" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/text_break" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutReplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/btn_replay" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/text_replay" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

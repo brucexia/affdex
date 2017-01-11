@@ -29,4 +29,6 @@
     <dimen name="grid_item_bottom_padding">8dp</dimen>
     <dimen name="grid_item_metric_name">15sp</dimen>
     <dimen name="metric_chooser_column_width">140dp</dimen>
+    <dimen name="small_logo_width">120dp</dimen>
+    <dimen name="small_logo_height">30dp</dimen>
 </resources>

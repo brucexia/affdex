@@ -7,7 +7,7 @@
 
 <resources>
 
-    <style name="MainActivityTheme" parent="android:Theme.Holo.NoActionBar">
+    <style name="MainTheme" parent="android:Theme.Holo.NoActionBar">
         <item name="android:windowBackground">@color/black</item>
     </style>
 

@@ -28,6 +28,13 @@
         custom:measurements_text_size="@dimen/measurements_text_size"
         custom:measurements_upper_spacing="@dimen/measurements_upper_text_spacing" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/logo" />
+
 </RelativeLayout>
 
 
