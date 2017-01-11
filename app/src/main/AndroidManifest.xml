@@ -7,7 +7,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.affectiva.affdexme">
+    package="com.moreants.care">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -29,7 +29,7 @@
         android:targetSdkVersion="23"
         tools:overrideLibrary="com.affectiva.android.affdex.sdk" />
     <application
-        android:name="com.affectiva.errorreporting.CustomApplication"
+        android:name="com.moreants.errorreporting.CustomApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -46,10 +46,10 @@
             android:theme="@style/EditPreferencesTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.affectiva.affdexme.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
         <activity
-            android:name="com.affectiva.errorreporting.ErrorReporter"
+            android:name="com.moreants.errorreporting.ErrorReporter"
             android:textAppearance="@android:style/TextAppearance.Large"
             android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>

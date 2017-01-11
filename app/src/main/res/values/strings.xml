@@ -47,4 +47,6 @@
     <string name="show_multiface_title">Enable Multi-face mode</string>
     <string name="negative">NEGATIVE</string>
     <string name="positive">POSITIVE</string>
+
+    <string name="welcome_name">Welcome, %s</string>
 </resources>

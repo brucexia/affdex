@@ -5,7 +5,7 @@ android {
     buildToolsVersion '25.0.2'
 
     defaultConfig {
-        applicationId "com.affectiva.affdexme"
+        applicationId "com.moreants.care"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 684
@@ -14,11 +14,11 @@ android {
     }
     buildTypes {
         debug {
-            resValue 'string', 'app_name', 'AffdexMeDbg'
+            resValue 'string', 'app_name', 'MoreantsCareDebug'
             applicationIdSuffix ".debug"
         }
         release {
-            resValue 'string', 'app_name', 'AffdexMe'
+            resValue 'string', 'app_name', 'MoreantsCare'
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
