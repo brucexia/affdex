@@ -11,7 +11,7 @@
     tools:context=".MainActivity">
 
     <SurfaceView
-        android:id="@+id/camera_preview"
+        android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true" />

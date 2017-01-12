@@ -17,10 +17,12 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -592,7 +594,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int STATE_BIRD = 0;
         public static final int STATE_FACE = 1;
         public static final int STATE_EYE = 2;
-
+        public static final int OFFSET_THRESHOLD=20;
         void increaseState() {
             if (state < STATE_EYE) {
                 state++;
@@ -619,9 +621,30 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {
             int index = faceAnimation.getCurrentFrameIndex();
-            c.drawOval(face.getEyesRect(), faceAnimation.getCurrentStrokePaint(faceAnimation.getCurrentFrameIndex()));
+            int offset = faceAnimation.getCurrentFrameIndex() * 20;
+            RectF rectF = face.getEyesRect();
+            Paint paint = new Paint();
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.eye_overlay_color));
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setStrokeWidth(3);
+            paint.setStrokeJoin(Paint.Join.ROUND);
+            rectF = new RectF(rectF.left - offset, rectF.top - offset, rectF.right + offset, rectF.bottom + offset);
+            c.drawOval(rectF, paint);
+        }
+        boolean isFaceContact(FaceLandmarks faceLandmarks, DrawingViewConfig config) {
+            Face face = faceLandmarks.sdkFace;
+            Face.Measurements.Orientation measurements = face.measurements.orientation;
+            PointF noseTip = faceLandmarks.getNoseTip();
+            return Math.abs(measurements.getPitch()) < OFFSET_THRESHOLD
+                    && Math.abs(measurements.getRoll()) < OFFSET_THRESHOLD
+                    && Math.abs(measurements.getYaw()) < OFFSET_THRESHOLD
+                    && Math.abs(noseTip.x - config.surfaceViewWidth / 2) < OFFSET_THRESHOLD;
         }
 
+        boolean isEyeContact(FaceLandmarks faceLandmarks, DrawingViewConfig config) {
+            PointF noseTip = faceLandmarks.getNoseTip();
+            return isFaceContact(faceLandmarks, config) && noseTip.y - config.surfaceViewHeight / 2 < OFFSET_THRESHOLD;
+        }
         void drawOutlineQuad(List<PointF> points, Canvas canvas, Paint paint) {
             Path path = new Path();
             boolean first = true;
