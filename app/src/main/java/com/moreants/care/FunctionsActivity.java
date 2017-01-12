@@ -19,6 +19,7 @@ public class FunctionsActivity extends Activity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_functions);
+        findViewById(R.id.btnEyeContact).setOnClickListener(this);
     }
 
     //Beginning of View.OnClickListener

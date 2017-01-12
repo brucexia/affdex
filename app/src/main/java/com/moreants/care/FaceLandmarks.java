@@ -20,6 +20,7 @@ import java.util.List;
  */
 
 public class FaceLandmarks implements FaceInterface {
+    public static final int NOSE_TIP = 12;
     public static final int OuterRightEye = 16;
     public static final int InnerRightEye = 17;
     public static final int UpperCornerRightEye = 30;
@@ -76,6 +77,10 @@ public class FaceLandmarks implements FaceInterface {
                 mFacePoints.get(OuterRightEye).x,
                 Math.max(mFacePoints.get(LowerCornerLeftEye).y, mFacePoints.get(LowerCornerRightEye).y));
         return rect;
+    }
+
+    public PointF getNoseTip(){
+        return mFacePoints.get(NOSE_TIP);
     }
     //toDO: add emotions
 

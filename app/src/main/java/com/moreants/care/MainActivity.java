@@ -662,11 +662,6 @@ public class MainActivity extends Activity
         }
         return false;
     }
-
-    public void settings_button_click(View view) {
-        startActivity(new Intent(this, SettingsActivity.class));
-    }
-
     public static final String TAG = MainActivity.class.getSimpleName();
 
     @SuppressWarnings("SuspiciousNameCombination")

@@ -1,6 +1,7 @@
 package com.moreants.care;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -16,19 +17,11 @@ import com.affectiva.android.affdex.sdk.detector.Face;
 import java.util.List;
 
 /**
- * This is a sample app using the FrameDetector object, which is not multi-threaded, and running it on a background thread in a custom object called
- * AsyncFrameDetector.
- * <p>
- * This app also contains sample code for using the camera.
  */
 public class TrainingActivity extends Activity implements CameraView.OnCameraViewEventListener,
         AsyncFrameDetector.OnDetectorEventListener,
-        TrainingController.TrainingControllerInterface {
-
-    private static final String LOG_TAG = "Affectiva";
-
-    //UI Elements
-
+        TrainingController.Listener {
+    public static final String KEY_DURATION = "duration";
     //state booleans
     boolean isCameraStarted = false;
     boolean isSDKRunning = false;
@@ -52,6 +45,12 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     int cameraPreviewHeight = 0;
 
     TrainingController trainingController;
+
+    public static void startTraining(Context context, int duration) {
+        Intent intent = new Intent(context, TrainingActivity.class);
+        intent.putExtra(KEY_DURATION, duration);
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +85,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         super.onStart();
         trainingController = TrainingController.getInstance();
         trainingController.addListener(this);
+
     }
 
     @Override
@@ -206,8 +206,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
             cameraPreviewWidth = width;
             cameraPreviewHeight = height;
         }
-        drawingView.setThickness((int) (cameraPreviewWidth / 100f));
-
+        trainingController.startTraining();
         mainLayout.post(new Runnable() {
             @Override
             public void run() {
@@ -253,8 +252,6 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     }
 
     static Frame createFrameFromData(byte[] frameData, int width, int height, Frame.ROTATE rotation) {
-        Log.d(TAG, String.format("createFrameFromData width:%d,height %d, rotation: %s", width, height, rotation));
-
         Frame.ByteArrayFrame frame = new Frame.ByteArrayFrame(frameData, width, height, Frame.COLOR_FORMAT.YUV_NV21);
         frame.setTargetRotation(rotation);
         return frame;

@@ -1,6 +1,7 @@
 package com.moreants.care;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import java.util.Timer;
@@ -27,6 +28,8 @@ public class SplashActivity extends Activity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
+                Intent intent = new Intent(SplashActivity.this, FunctionsActivity.class);
+                startActivity(intent);
                 if (!isFinishing())
                     finish();
             }

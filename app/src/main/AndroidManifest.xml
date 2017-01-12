@@ -29,7 +29,6 @@
         android:targetSdkVersion="23"
         tools:overrideLibrary="com.affectiva.android.affdex.sdk" />
     <application
-        android:name="com.moreants.errorreporting.CustomApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -42,22 +41,7 @@
             android:theme="@style/MainTheme">
 
         </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:theme="@style/EditPreferencesTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name="com.moreants.errorreporting.ErrorReporter"
-            android:textAppearance="@android:style/TextAppearance.Large"
-            android:theme="@android:style/Theme.DeviceDefault">
-            <intent-filter>
-                <action android:name="com.affectiva.REPORT_ERROR" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+
         <activity
             android:name=".TrainingActivity"
             android:exported="true"></activity>

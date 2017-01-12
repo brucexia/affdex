@@ -13,7 +13,7 @@ public class TrainingController {
     public static final int DEFAULT_TRAINING_DURATION = 5;
     Timer timer;
     int durationInMinutes;
-    List<TrainingControllerInterface> listeners;
+    List<Listener> listeners;
 
     public static TrainingController getInstance() {
         return new TrainingController(DEFAULT_TRAINING_DURATION);
@@ -29,7 +29,9 @@ public class TrainingController {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-
+                for (Listener listener : listeners) {
+                    listener.onComplete();
+                }
             }
         }, durationInMinutes * 60 * 1000);
     }
@@ -40,15 +42,15 @@ public class TrainingController {
         }
     }
 
-    public void addListener(TrainingControllerInterface listener) {
+    public void addListener(Listener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(TrainingControllerInterface listener) {
+    public void removeListener(Listener listener) {
         listeners.remove(listener);
     }
 
-    interface TrainingControllerInterface {
+    interface Listener {
         void onComplete();
     }
 }
