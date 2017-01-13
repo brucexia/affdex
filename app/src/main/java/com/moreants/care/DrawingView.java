@@ -62,6 +62,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
     public DrawingViewConfig drawingViewConfig;
     private DrawingThreadEventListener listener;
     FaceAnimationV1 faceAnimation;
+    Bitmap faceCoverImage;
 
     //three constructors required of any custom view
     public DrawingView(Context context) {
@@ -175,6 +176,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         //statically load the emoji bitmaps on-demand and cache
         emojiMarkerBitmapToEmojiTypeMap = new HashMap<>();
+        faceCoverImage = new FaceCoverImageFactory(getContext()).getARBitmap(null);
     }
 
     public void setTypeface(Typeface face) {
@@ -532,11 +534,19 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                 PointF noseTip = transformedPoints.get(12);
                 switch (state) {
                     case STATE_BIRD: {
-                        Bitmap bitmap = new FaceCoverImageFactory(getContext()).getARBitmap(null);
+                        Bitmap bitmap = faceCoverImage;
+                        if (faceCoverImage.getWidth() > boundingRect.width()) {
+
+                            float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
+                            bitmap = Bitmap.createScaledBitmap(faceCoverImage,
+                                    boundingRect.width() - 10,
+                                    Math.round((boundingRect.width() - 10) * aspectRation), true);
+                        }
                         if (bitmap != null) {
                             // draw on tip of the nose
-                            int left = Math.round(noseTip.x - bitmap.getWidth() / 2);
-                            int top = Math.round(noseTip.y - bitmap.getHeight() / 2);
+                            int left = Math.round(noseTip.x - boundingRect.width() / 2);
+                            int top = Math.round(noseTip.y - boundingRect.width() / 2);
+
                             c.drawBitmap(bitmap, left, top, null);
                         }
                         if (timer == null) {
