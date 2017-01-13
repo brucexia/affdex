@@ -12,9 +12,20 @@
         android:src="@drawable/logo" />
 
     <TextView
+        android:id="@+id/greetingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:text="@string/welcome_name" />
+        android:text="@string/welcome_name"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/welcome_name"
+        android:textColor="@color/white" />
 
 </LinearLayout>

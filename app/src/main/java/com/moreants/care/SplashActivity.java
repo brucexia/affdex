@@ -3,6 +3,8 @@ package com.moreants.care;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.DateUtils;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,11 +15,16 @@ import java.util.TimerTask;
 
 public class SplashActivity extends Activity {
     Timer timer;
+    TextView greetingTextView, dateTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_splash);
+        greetingTextView = ((TextView) findViewById(R.id.greetingTextView));
+        dateTextView = ((TextView) findViewById(R.id.dateTextView));
+        greetingTextView.setText(getString(R.string.welcome_name, "Michael"));
+        dateTextView.setText(DateUtils.formatDateTime(this, System.currentTimeMillis(), DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME));
         //TODO: do some background loading here
     }
 
