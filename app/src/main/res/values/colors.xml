@@ -16,5 +16,6 @@
     <color name="grid_item_not_chosen">#646464</color>
     <color name="grid_item_chosen">#009600</color>
     <color name="grid_item_chosen_over_limit">#cf1a0b</color>
-    <color name="eye_overlay_color">#888A2BE2</color>
+    <color name="eye_overlay_color">#6633cc</color>
+    <color name="face_oval_color">#00ffff</color>
 </resources>

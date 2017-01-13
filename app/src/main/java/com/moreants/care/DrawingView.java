@@ -572,7 +572,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         void drawFaceAnimation(Canvas c, PointF noseTip, int faceWidth) {
             int index = faceAnimation.getCurrentFrameIndex();
-            c.drawCircle(noseTip.x, noseTip.y, faceWidth / 2 + index * 5, faceAnimation.getCurrentStrokePaint(index));
+            c.drawCircle(noseTip.x, noseTip.y, (faceWidth / 2 + 45) - index * 5, faceAnimation.getCurrentStrokePaint(index));
         }
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {
