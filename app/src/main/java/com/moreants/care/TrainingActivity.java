@@ -83,7 +83,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     @Override
     protected void onStart() {
         super.onStart();
-        trainingController = TrainingController.getInstance();
+        trainingController = TrainingController.getInstance(this);
         trainingController.addListener(this);
 
     }
@@ -100,7 +100,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         numberCameraFramesReceived = numberSDKFramesReceived = 0;
     }
 
-    CameraHelper.CameraType cameraIndex = CameraHelper.CameraType.CAMERA_FRONT;
+    CameraHelper.CameraType cameraIndex = CameraHelper.CameraType.CAMERA_BACK;
 
     void startCamera() {
         if (isCameraStarted) {

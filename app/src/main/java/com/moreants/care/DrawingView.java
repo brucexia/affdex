@@ -503,7 +503,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
                 //Draw facial tracking dots.
                 if (config.isDrawPointsEnabled) {
-                    c.drawCircle(x, y, 5, trackingPointsPaint);
+//                    c.drawCircle(x, y, 5, trackingPointsPaint);
                 }
             }
 
@@ -532,57 +532,31 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             if (true) {
 //            if (face.emotions.getJoy() > 30) {
                 PointF noseTip = transformedPoints.get(12);
-                switch (state) {
-                    case STATE_BIRD: {
-                        Bitmap bitmap = faceCoverImage;
-                        if (faceCoverImage.getWidth() > boundingRect.width()) {
+                FaceLandmarks faceLandmarks = new FaceLandmarks(face, mirrorPoints);
+                faceLandmarks.mFacePoints = transformedPoints;
+                if (!isFaceContact(faceLandmarks, config)) {
+                    Bitmap bitmap = faceCoverImage;
+                    if (faceCoverImage.getWidth() > boundingRect.width()) {
 
-                            float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
-                            bitmap = Bitmap.createScaledBitmap(faceCoverImage,
-                                    boundingRect.width() - 10,
-                                    Math.round((boundingRect.width() - 10) * aspectRation), true);
-                        }
-                        if (bitmap != null) {
-                            // draw on tip of the nose
-                            int left = Math.round(noseTip.x - boundingRect.width() / 2);
-                            int top = Math.round(noseTip.y - boundingRect.width() / 2);
+                        float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
+                        bitmap = Bitmap.createScaledBitmap(faceCoverImage,
+                                boundingRect.width() - 10,
+                                Math.round((boundingRect.width() - 10) * aspectRation), true);
+                    }
+                    if (bitmap != null) {
+                        // draw on tip of the nose
+                        int left = Math.round(noseTip.x - boundingRect.width() / 2);
+                        int top = Math.round(noseTip.y - boundingRect.width() / 2);
 
-                            c.drawBitmap(bitmap, left, top, null);
-                        }
-                        if (timer == null) {
-                            timer = new Timer();
-                            timer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    increaseState();
-                                    timer = null;
-                                }
-                            }, 5000);
-                        }
-                        drawFaceAnimation(c, noseTip);
+                        c.drawBitmap(bitmap, left, top, null);
                     }
-                    break;
-                    case STATE_FACE: {
 
-                        if (timer == null) {
-                            timer = new Timer();
-                            timer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    timer = null;
-                                    increaseState();
-                                }
-                            }, 5000);
-                        }
-                        drawFaceAnimation(c, noseTip);
-                    }
-                    break;
-                    case STATE_EYE: {
-                        FaceLandmarks faceLandmarks = new FaceLandmarks(face, mirrorPoints);
-                        faceLandmarks.mFacePoints = transformedPoints;
-                        drawEyeAnimation(c, faceLandmarks);
-                    }
-                    break;
+                    drawFaceAnimation(c, noseTip, boundingRect.width());
+                } else if (!isEyeContact(faceLandmarks, config)) {
+                    drawEyeAnimation(c, faceLandmarks);
+                } else {
+                    //Eye contact, play encouragement
+                    TrainingController.getInstance(getContext()).playEyeContactEncourage();
                 }
             }
         }
@@ -592,7 +566,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int STATE_BIRD = 0;
         public static final int STATE_FACE = 1;
         public static final int STATE_EYE = 2;
-        public static final int OFFSET_THRESHOLD = 20;
+        public static final int OFFSET_THRESHOLD = 30;
 
         void increaseState() {
             if (state < STATE_EYE) {
@@ -613,19 +587,19 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             return fastConvexHull.execute((ArrayList<PointF>) points);
         }
 
-        void drawFaceAnimation(Canvas c, PointF noseTip) {
+        void drawFaceAnimation(Canvas c, PointF noseTip, int faceWidth) {
             int index = faceAnimation.getCurrentFrameIndex();
-            c.drawCircle(noseTip.x, noseTip.y, 100 + index * 10, faceAnimation.getCurrentStrokePaint(index));
+            c.drawCircle(noseTip.x, noseTip.y, faceWidth / 2 + index * 5, faceAnimation.getCurrentStrokePaint(index));
         }
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {
             int index = faceAnimation.getCurrentFrameIndex();
-            int offset = index * 5;
+            int offset = index * 2;
             RectF rectF = face.getEyesRect();
             Paint paint = new Paint();
             paint.setColor(ContextCompat.getColor(getContext(), R.color.eye_overlay_color));
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(3);
+            paint.setStrokeWidth(config.drawThickness);
             paint.setStrokeJoin(Paint.Join.ROUND);
             rectF = new RectF(rectF.left - offset, rectF.top - offset, rectF.right + offset, rectF.bottom + offset);
             c.drawOval(rectF, paint);
@@ -680,7 +654,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 //            if (mirrorPoints) {
 //                result.x = (config.imageWidth - point.x) * config.screenToImageRatio;
 //            } else {
-                result.x = (point.x) * config.screenToImageRatio;
+            result.x = (point.x) * config.screenToImageRatio;
 //            }
             result.y = (point.y) * config.screenToImageRatio;
             return result;
@@ -902,6 +876,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
             return desiredEmojiBitmap;
         }
+
     }
 
     public void reset() {

@@ -40,6 +40,7 @@ public class DrawingViewConfig {
         this.surfaceViewHeight = surfaceViewHeight;
         screenToImageRatio = (float) surfaceViewWidth / imageWidth;
         isDimensionsNeeded = false;
+        setDrawThickness(Math.min(surfaceViewWidth, surfaceViewHeight) / 200);
     }
 
     public void setDrawThickness(int t) {

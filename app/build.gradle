@@ -14,11 +14,11 @@ android {
     }
     buildTypes {
         debug {
-            resValue 'string', 'app_name', 'MoreantsCareDebug'
+            resValue 'string', 'app_name', 'MoreantsDebug'
             applicationIdSuffix ".debug"
         }
         release {
-            resValue 'string', 'app_name', 'MoreantsCare'
+            resValue 'string', 'app_name', 'Moreants'
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
