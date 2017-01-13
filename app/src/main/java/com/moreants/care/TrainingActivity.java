@@ -100,11 +100,13 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         numberCameraFramesReceived = numberSDKFramesReceived = 0;
     }
 
+    CameraHelper.CameraType cameraIndex = CameraHelper.CameraType.CAMERA_FRONT;
+
     void startCamera() {
         if (isCameraStarted) {
             cameraView.stopCamera();
         }
-        cameraView.startCamera(CameraHelper.CameraType.CAMERA_BACK);
+        cameraView.startCamera(cameraIndex);
         isCameraStarted = true;
         asyncDetector.reset();
     }
@@ -172,12 +174,17 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     @Override
     public void onImageResults(List<Face> faces, Frame image, float timeStamp) {
         //statusTextView.setText(String.format("Most recent time stamp: %.4f",timeStamp));
+        float timeStamp1 = (float) SystemClock.elapsedRealtime() / 1000f;
+
+        Log.d(TAG, String.format("onImageResults most recent time stamp:%.4f, %.4f, %.4f", lastTimestamp, timeStamp1, timeStamp1 - lastTimestamp));
         if (timeStamp < lastReceivedTimestamp)
             throw new RuntimeException("Got a timestamp out of order!");
         lastReceivedTimestamp = timeStamp;
 
-        if (faces == null || faces.isEmpty())
+        if (faces == null || faces.isEmpty()) {
+            drawingView.invalidatePoints();
             return; //No Face Detected
+        }
 //        PointF points[] = faces.get(0).getFacePoints();
 //        StringBuilder stringBuilder = new StringBuilder();
 //        for (PointF pointF : points) {
@@ -188,7 +195,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
 //        Log.d(TAG, "TrainingActivity face points:" + stringBuilder.toString());
         transformPoints(faces.get(0).getFacePoints(), image.getWidth(), image.getHeight(), image.getTargetRotation());
 
-        drawingView.updatePoints(faces, false);
+        drawingView.updatePoints(faces, cameraIndex == CameraHelper.CameraType.CAMERA_FRONT);
 
         numberSDKFramesReceived += 1;
 
@@ -260,6 +267,14 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
     void transformPoints(PointF[] points, int width, int height, Frame.ROTATE rotation) {
 //        Frame.revertPointRotation(points, width, height, rotation);
         switch (rotation) {
+            case NO_ROTATION: {
+                if (cameraIndex == CameraHelper.CameraType.CAMERA_FRONT) {
+                    for (PointF pointF : points) {
+                        pointF.x = width - pointF.x;
+                    }
+                }
+            }
+            break;
             case BY_90_CCW: {
                 for (PointF pointF : points) {
                     float tmp = pointF.x;

@@ -33,10 +33,12 @@ public class FaceLandmarks implements FaceInterface {
 
     Face sdkFace;
     List<PointF> mFacePoints;
+    boolean isMirrored;
 
-    public FaceLandmarks(Face face) {
+    public FaceLandmarks(Face face, boolean mirror) {
         sdkFace = face;
         mFacePoints = new ArrayList(Arrays.asList(face.getFacePoints()));
+        isMirrored = mirror;
     }
 
 
@@ -72,14 +74,16 @@ public class FaceLandmarks implements FaceInterface {
     }
 
     public RectF getEyesRect() {
-        RectF rect = new RectF(mFacePoints.get(OuterLeftEye).x,
+        PointF left = isMirrored ? getOuterLeftEye() : getOuterRightEye();
+        PointF right = isMirrored ? getOuterRightEye() : getOuterLeftEye();
+        RectF rect = new RectF(left.x,
                 Math.min(mFacePoints.get(UpperCornerLeftEye).y, mFacePoints.get(UpperCornerRightEye).y),
-                mFacePoints.get(OuterRightEye).x,
+                right.x,
                 Math.max(mFacePoints.get(LowerCornerLeftEye).y, mFacePoints.get(LowerCornerRightEye).y));
         return rect;
     }
 
-    public PointF getNoseTip(){
+    public PointF getNoseTip() {
         return mFacePoints.get(NOSE_TIP);
     }
     //toDO: add emotions
@@ -101,12 +105,8 @@ public class FaceLandmarks implements FaceInterface {
     }
 
     public List<PointF> transformPoints(DrawingViewConfig config, boolean mirrorPoints) {
-        return transformFacePoints(mFacePoints, mirrorPoints, config);
-    }
-
-    List<PointF> transformFacePoints(List<PointF> points, boolean mirrorPoints, DrawingViewConfig config) {
-        for (PointF p : points) {
-            PointF q = getTransformedPointF(p, mirrorPoints, config);
+        for (PointF p : mFacePoints) {
+            getTransformedPointF(p, mirrorPoints, config);
         }
         return mFacePoints;
     }

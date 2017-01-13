@@ -557,7 +557,7 @@ public class MainActivity extends Activity
     List<FaceInterface> getFaces(List<Face> faces) {
         List<FaceInterface> facePoints = new ArrayList<>();
         for (Face face : faces) {
-            facePoints.add(new FaceLandmarks(face));
+            facePoints.add(new FaceLandmarks(face, mirrorPoints));
         }
         return facePoints;
     }

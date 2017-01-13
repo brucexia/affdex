@@ -332,12 +332,12 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             mSurfaceHolder = surfaceHolder;
 
             //statically load the Appearance marker bitmaps so they only have to load once
-            appearanceMarkerBitmap_genderMale_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "male_glasses.png");
-            appearanceMarkerBitmap_genderMale_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "male_noglasses.png");
-            appearanceMarkerBitmap_genderFemale_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "female_glasses.png");
-            appearanceMarkerBitmap_genderFemale_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "female_noglasses.png");
-            appearanceMarkerBitmap_genderUnknown_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "unknown_glasses.png");
-            appearanceMarkerBitmap_genderUnknown_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "unknown_noglasses.png");
+//            appearanceMarkerBitmap_genderMale_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "male_glasses.png");
+//            appearanceMarkerBitmap_genderMale_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "male_noglasses.png");
+//            appearanceMarkerBitmap_genderFemale_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "female_glasses.png");
+//            appearanceMarkerBitmap_genderFemale_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "female_noglasses.png");
+//            appearanceMarkerBitmap_genderUnknown_glassesOn = ImageHelper.loadBitmapFromInternalStorage(getContext(), "unknown_glasses.png");
+//            appearanceMarkerBitmap_genderUnknown_glassesOff = ImageHelper.loadBitmapFromInternalStorage(getContext(), "unknown_noglasses.png");
 
             trackingPointsPaint = new Paint();
             trackingPointsPaint.setColor(Color.WHITE);
@@ -503,13 +503,13 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
                 //Draw facial tracking dots.
                 if (config.isDrawPointsEnabled) {
-                    c.drawCircle(x, y, 1, trackingPointsPaint);
+                    c.drawCircle(x, y, 5, trackingPointsPaint);
                 }
             }
 
             //Draw the bounding box.
 //            if (config.isDrawPointsEnabled) {
-            drawBoundingBox(c, face, boundingRect);
+//            drawBoundingBox(c, face, boundingRect);
 //            }
 
 //            float heightOffset = findNecessaryHeightOffset(boundingRect, face);
@@ -563,12 +563,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                     }
                     break;
                     case STATE_FACE: {
-                        Paint paint1 = new Paint();
-                        paint1.setColor(Color.RED);
-                        paint1.setStyle(Paint.Style.STROKE);
-                        paint1.setStrokeWidth(2);
-                        paint1.setStrokeJoin(Paint.Join.ROUND);
-                        drawOutlineQuad(getEdgePoints(transformedPoints), c, paint1);
+
                         if (timer == null) {
                             timer = new Timer();
                             timer.schedule(new TimerTask() {
@@ -583,15 +578,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                     }
                     break;
                     case STATE_EYE: {
-                        FaceLandmarks faceLandmarks = new FaceLandmarks(face);
+                        FaceLandmarks faceLandmarks = new FaceLandmarks(face, mirrorPoints);
                         faceLandmarks.mFacePoints = transformedPoints;
-//                        Paint paint1 = new Paint();
-//                        paint1.setColor(Color.rgb(255, 165, 0));
-//                        paint1.setStyle(Paint.Style.STROKE);
-//                        paint1.setStrokeJoin(Paint.Join.ROUND);
-//                        paint1.setStrokeWidth(10);
-//                        drawOutlineQuad(faceLandmarks.getLeftEyePoints(), c, paint1);
-//                        drawOutlineQuad(faceLandmarks.getRightEyePoints(), c, paint1);
                         drawEyeAnimation(c, faceLandmarks);
                     }
                     break;
@@ -604,7 +592,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int STATE_BIRD = 0;
         public static final int STATE_FACE = 1;
         public static final int STATE_EYE = 2;
-        public static final int OFFSET_THRESHOLD=20;
+        public static final int OFFSET_THRESHOLD = 20;
+
         void increaseState() {
             if (state < STATE_EYE) {
                 state++;
@@ -631,7 +620,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {
             int index = faceAnimation.getCurrentFrameIndex();
-            int offset = faceAnimation.getCurrentFrameIndex() * 20;
+            int offset = index * 5;
             RectF rectF = face.getEyesRect();
             Paint paint = new Paint();
             paint.setColor(ContextCompat.getColor(getContext(), R.color.eye_overlay_color));
@@ -641,6 +630,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             rectF = new RectF(rectF.left - offset, rectF.top - offset, rectF.right + offset, rectF.bottom + offset);
             c.drawOval(rectF, paint);
         }
+
         boolean isFaceContact(FaceLandmarks faceLandmarks, DrawingViewConfig config) {
             Face face = faceLandmarks.sdkFace;
             Face.Measurements.Orientation measurements = face.measurements.orientation;
@@ -655,6 +645,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             PointF noseTip = faceLandmarks.getNoseTip();
             return isFaceContact(faceLandmarks, config) && noseTip.y - config.surfaceViewHeight / 2 < OFFSET_THRESHOLD;
         }
+
         void drawOutlineQuad(List<PointF> points, Canvas canvas, Paint paint) {
             Path path = new Path();
             boolean first = true;
@@ -686,11 +677,11 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
         PointF getTransformedPointF(PointF point, boolean mirrorPoints) {
             PointF result = new PointF();
-            if (mirrorPoints) {
-                result.x = (config.imageWidth - point.x) * config.screenToImageRatio;
-            } else {
+//            if (mirrorPoints) {
+//                result.x = (config.imageWidth - point.x) * config.screenToImageRatio;
+//            } else {
                 result.x = (point.x) * config.screenToImageRatio;
-            }
+//            }
             result.y = (point.y) * config.screenToImageRatio;
             return result;
         }
