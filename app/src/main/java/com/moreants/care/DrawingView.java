@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * This class contains a SurfaceView and its own thread that draws to it.
@@ -486,7 +485,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         private void drawFaceAttributes(Canvas c, Face face, boolean mirrorPoints, boolean isMultiFaceMode) {
             //Coordinates around which to draw bounding box.
             //Default to an 'inverted' box, where the absolute max and min values of the surface view are inside-out
-            Rect boundingRect = new Rect(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
+            RectF boundingRect = new RectF(config.surfaceViewWidth, config.surfaceViewHeight, 0, 0);
             PointF[] pointFs = face.getFacePoints();
 
             List<PointF> transformedPoints = transformFacePoints(pointFs, mirrorPoints);
@@ -498,8 +497,8 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
                 //For some reason I needed to add each point twice to make sure that all the
                 //points get properly registered in the bounding box.
-                boundingRect.union(Math.round(x), Math.round(y));
-                boundingRect.union(Math.round(x), Math.round(y));
+                boundingRect.union(x, y);
+                boundingRect.union(x, y);
 
                 //Draw facial tracking dots.
                 if (config.isDrawPointsEnabled) {
@@ -507,63 +506,47 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
 
-            //Draw the bounding box.
-//            if (config.isDrawPointsEnabled) {
-//            drawBoundingBox(c, face, boundingRect);
-//            }
+            PointF noseTip = transformedPoints.get(12);
+            FaceLandmarks faceLandmarks = new FaceLandmarks(face, mirrorPoints);
+            faceLandmarks.mFacePoints = transformedPoints;
+            if (!isFaceContact(faceLandmarks, config)) {
+                Bitmap bitmap = faceCoverImage;
+                if (faceCoverImage.getWidth() > boundingRect.width()) {
 
-//            float heightOffset = findNecessaryHeightOffset(boundingRect, face);
-//
-//            //Draw the Appearance markers (gender / glasses)
-//            if (config.isDrawAppearanceMarkersEnabled) {
-//                drawAppearanceMarkers(c, face, boundingRect, heightOffset);
-//            }
-//
-//            //Draw the Emoji markers
-//            if (config.isDrawEmojiMarkersEnabled) {
-//                drawDominantEmoji(c, face, boundingRect, heightOffset);
-//            }
-//
-//            //Only draw the dominant emotion bar in multiface mode
-//            if (isMultiFaceMode) {
-//                drawDominantEmotion(c, face, boundingRect);
-//            }
-
-            if (true) {
-//            if (face.emotions.getJoy() > 30) {
-                PointF noseTip = transformedPoints.get(12);
-                FaceLandmarks faceLandmarks = new FaceLandmarks(face, mirrorPoints);
-                faceLandmarks.mFacePoints = transformedPoints;
-                if (!isFaceContact(faceLandmarks, config)) {
-                    Bitmap bitmap = faceCoverImage;
-                    if (faceCoverImage.getWidth() > boundingRect.width()) {
-
-                        float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
-                        bitmap = Bitmap.createScaledBitmap(faceCoverImage,
-                                boundingRect.width() - 10,
-                                Math.round((boundingRect.width() - 10) * aspectRation), true);
-                    }
-                    if (bitmap != null) {
-                        // draw on tip of the nose
-                        int left = Math.round(noseTip.x - boundingRect.width() / 2);
-                        int top = Math.round(noseTip.y - boundingRect.width() / 2);
-
-                        c.drawBitmap(bitmap, left, top, null);
-                    }
-
-                    drawFaceAnimation(c, noseTip, boundingRect.width());
-                } else if (!isEyeContact(faceLandmarks, config)) {
-                    drawEyeAnimation(c, faceLandmarks);
-                } else {
-                    //Eye contact, play encouragement
-                    TrainingController.getInstance(getContext()).playEyeContactEncourage();
+                    float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
+                    bitmap = Bitmap.createScaledBitmap(faceCoverImage,
+                            Math.round(boundingRect.width() - 10),
+                            Math.round((boundingRect.width() - 10) * aspectRation), true);
                 }
+                if (bitmap != null) {
+                    // draw on tip of the nose
+                    int left = Math.round(noseTip.x - boundingRect.width() / 2);
+                    int top = Math.round(noseTip.y - boundingRect.width() / 2);
+
+                    c.drawBitmap(bitmap, left, top, null);
+                }
+                state = STATE_NO_CONTACT;
+                drawFaceAnimation(c, noseTip, Math.round(boundingRect.width()));
+            } else if (!isEyeContact(faceLandmarks, config)) {
+                if (state < STATE_FACE) {
+                    TrainingController.getInstance(getContext()).playEyeContactEncourage();
+                    state = STATE_FACE;
+                }
+                c.drawOval(boundingRect, config.faceOvalPaint);
+                drawEyeAnimation(c, faceLandmarks);
+            } else {
+                //Eye contact, play encouragement
+                if (state < STATE_EYE) {
+                    TrainingController.getInstance(getContext()).playEyeContactEncourage();
+                    state = STATE_EYE;
+                }
+                drawEyeAnimation(c, faceLandmarks);
             }
         }
 
         Timer timer;
         int state;
-        public static final int STATE_BIRD = 0;
+        public static final int STATE_NO_CONTACT = 0;
         public static final int STATE_FACE = 1;
         public static final int STATE_EYE = 2;
         public static final int OFFSET_THRESHOLD = 30;

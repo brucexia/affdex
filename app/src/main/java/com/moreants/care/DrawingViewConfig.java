@@ -1,5 +1,6 @@
 package com.moreants.care;
 
+import android.graphics.Color;
 import android.graphics.Paint;
 
 /**
@@ -19,6 +20,7 @@ public class DrawingViewConfig {
     public Paint dominantEmotionLabelPaint;
     public Paint dominantEmotionMetricBarPaint;
     public Paint dominantEmotionValuePaint;
+    public Paint faceOvalPaint;
     public int metricBarWidth;
 
     public void setDominantEmotionLabelPaints(Paint labelPaint, Paint valuePaint) {
@@ -41,6 +43,10 @@ public class DrawingViewConfig {
         screenToImageRatio = (float) surfaceViewWidth / imageWidth;
         isDimensionsNeeded = false;
         setDrawThickness(Math.min(surfaceViewWidth, surfaceViewHeight) / 200);
+        faceOvalPaint = new Paint();
+        faceOvalPaint.setStyle(Paint.Style.STROKE);
+        faceOvalPaint.setStrokeWidth(drawThickness);
+        faceOvalPaint.setColor(Color.RED);
     }
 
     public void setDrawThickness(int t) {
