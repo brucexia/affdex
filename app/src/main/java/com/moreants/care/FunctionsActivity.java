@@ -1,6 +1,7 @@
 package com.moreants.care;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +16,11 @@ import java.util.TimerTask;
 public class FunctionsActivity extends Activity implements View.OnClickListener {
     Timer timer;
 
+    public static void start(Context context) {
+        Intent intent = new Intent(context, FunctionsActivity.class);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,8 +34,7 @@ public class FunctionsActivity extends Activity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnEyeContact: {
-                Intent intent = new Intent(this, TrainingActivity.class);
-                startActivity(intent);
+                TrainingActivity.startTraining(this, 1);
                 finish();
             }
             break;

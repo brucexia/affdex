@@ -16,7 +16,7 @@ public class FinishActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_functions);
+        setContentView(R.layout.layout_finish);
     }
 
     //Beginning of View.OnClickListener
@@ -24,9 +24,13 @@ public class FinishActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btnEyeContact: {
-                Intent intent = new Intent(this, TrainingActivity.class);
-                startActivity(intent);
+            case R.id.layoutReplay: {
+                TrainingActivity.startTraining(this, 1);
+                finish();
+            }
+            break;
+            case R.id.layoutBreak: {
+                FunctionsActivity.start(this);
                 finish();
             }
             break;

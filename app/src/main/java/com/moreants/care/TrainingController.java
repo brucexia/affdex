@@ -16,7 +16,7 @@ import java.util.TimerTask;
  */
 
 public class TrainingController {
-    public static final int DEFAULT_TRAINING_DURATION = 5;
+    public static final int DEFAULT_TRAINING_DURATION = 3;
     Timer timer;
     int durationInMinutes;
     List<Listener> listeners;

@@ -28,8 +28,7 @@ public class SplashActivity extends Activity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, FunctionsActivity.class);
-                startActivity(intent);
+                FunctionsActivity.start(SplashActivity.this);
                 if (!isFinishing())
                     finish();
             }
