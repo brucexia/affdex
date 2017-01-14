@@ -70,6 +70,7 @@ public class TrainingActivity extends Activity implements CameraView.OnCameraVie
         drawingView.setZOrderMediaOverlay(true);
         cameraView.setZOrderMediaOverlay(false);
         drawingView.setFaceAnimation(new FaceAnimationV1(this));
+        drawingView.setEyeAnimation(new EyeAnimation(this));
         drawingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

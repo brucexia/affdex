@@ -61,6 +61,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
     public DrawingViewConfig drawingViewConfig;
     private DrawingThreadEventListener listener;
     FaceAnimationV1 faceAnimation;
+    EyeAnimation eyeAnimation;
     Bitmap faceCoverImage;
 
     //three constructors required of any custom view
@@ -81,6 +82,10 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void setFaceAnimation(FaceAnimationV1 faceAnimation) {
         this.faceAnimation = faceAnimation;
+    }
+
+    public void setEyeAnimation(EyeAnimation animation) {
+        this.eyeAnimation = animation;
     }
 
     private static int getDrawable(@NonNull Context context, @NonNull String name) {
@@ -576,7 +581,7 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         void drawEyeAnimation(Canvas c, FaceLandmarks face) {
-            int index = faceAnimation.getCurrentFrameIndex();
+            int index = eyeAnimation.getCurrentFrameIndex();
             int offset = index * 2;
             RectF rectF = face.getEyesRect();
             Paint paint = new Paint();

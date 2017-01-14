@@ -48,13 +48,16 @@
             android:screenOrientation="landscape"></activity>
         <activity
             android:name=".FunctionsActivity"
-            android:exported="true"></activity>
+            android:exported="true"
+            android:screenOrientation="landscape"></activity>
         <activity
             android:name=".FinishActivity"
-            android:exported="true"></activity>
+            android:exported="true"
+            android:screenOrientation="landscape"></activity>
         <activity
             android:name=".SplashActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

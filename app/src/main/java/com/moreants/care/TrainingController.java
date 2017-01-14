@@ -39,7 +39,6 @@ public class TrainingController {
         this.durationInMinutes = durationInMinutes;
         listeners = new ArrayList<>();
         mediaHelper = new MediaHelper(context);
-        playEyeContactEncourage();
     }
 
     public void startTraining() {
