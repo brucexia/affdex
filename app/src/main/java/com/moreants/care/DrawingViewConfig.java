@@ -22,6 +22,7 @@ public class DrawingViewConfig {
     public Paint dominantEmotionValuePaint;
     public Paint faceOvalPaint;
     public int metricBarWidth;
+    public float minFaceCoverWidth;
 
     public void setDominantEmotionLabelPaints(Paint labelPaint, Paint valuePaint) {
         dominantEmotionLabelPaint = labelPaint;
@@ -47,6 +48,7 @@ public class DrawingViewConfig {
         faceOvalPaint.setStyle(Paint.Style.STROKE);
         faceOvalPaint.setStrokeWidth(drawThickness);
         faceOvalPaint.setColor(Color.RED);
+        minFaceCoverWidth = Math.min(surfaceViewWidth, surfaceViewHeight) / 5;
     }
 
     public void setDrawThickness(int t) {

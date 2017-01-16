@@ -516,12 +516,13 @@ public class DrawingView extends SurfaceView implements SurfaceHolder.Callback {
             faceLandmarks.mFacePoints = transformedPoints;
             if (!isFaceContact(faceLandmarks, config)) {
                 Bitmap bitmap = faceCoverImage;
-                if (faceCoverImage.getWidth() > boundingRect.width()) {
+                float width = boundingRect.width() - 10 > config.minFaceCoverWidth ? boundingRect.width() - 10 : config.minFaceCoverWidth;
+                if (faceCoverImage.getWidth() > width) {
 
                     float aspectRation = faceCoverImage.getHeight() / faceCoverImage.getWidth();
                     bitmap = Bitmap.createScaledBitmap(faceCoverImage,
-                            Math.round(boundingRect.width() - 10),
-                            Math.round((boundingRect.width() - 10) * aspectRation), true);
+                            Math.round(width),
+                            Math.round(width * aspectRation), true);
                 }
                 if (bitmap != null) {
                     // draw on tip of the nose

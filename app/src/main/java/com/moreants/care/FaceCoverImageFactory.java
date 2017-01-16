@@ -16,10 +16,6 @@ public class FaceCoverImageFactory {
     }
 
     public Bitmap getARBitmap(FaceInterface face) {
-//        Face.Emotions emotions = face.emotions;
-//        if (emotions.getJoy() > 30) {
-            return BitmapFactory.decodeResource(mContext.getResources(), R.drawable.angrybird_head);
-//        }
-//        return null;
+        return BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pikachu);
     }
 }
