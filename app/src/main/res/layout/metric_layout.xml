@@ -39,7 +39,7 @@
             android:id="@+id/metric_name_0"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_0"
             style="@style/metricPct" />
 
@@ -47,7 +47,7 @@
             android:id="@+id/metric_name_1"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_1"
             style="@style/metricPct" />
 
@@ -55,7 +55,7 @@
             android:id="@+id/metric_name_2"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_2"
             style="@style/metricPct" />
     </LinearLayout>
@@ -98,7 +98,7 @@
             android:id="@+id/metric_name_3"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_3"
             style="@style/metricPct" />
 
@@ -106,7 +106,7 @@
             android:id="@+id/metric_name_4"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_4"
             style="@style/metricPct" />
 
@@ -114,7 +114,7 @@
             android:id="@+id/metric_name_5"
             style="@style/metricName" />
 
-        <com.moreants.care.MetricDisplay
+        <com.moreants.glass.MetricDisplay
             android:id="@+id/metric_pct_5"
             style="@style/metricPct" />
     </LinearLayout>
